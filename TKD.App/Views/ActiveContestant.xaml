@@ -1,0 +1,457 @@
+﻿<Window x:Class="TKD.App.ActiveContestant"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TKD.App.Controllers"
+        mc:Ignorable="d"
+        Title="ActiveContestant"
+        Height="598.768"
+        Width="800"
+        Loaded="Window_Loaded"
+        WindowStyle="None"
+        Icon="../img/icon.png">
+    <Window.Resources>
+        
+        <local:DoubleTextConverter x:Key="doubleTextConvert" />
+        
+        <ContextMenu x:Key="CogDialog">
+            <MenuItem Header="Pull"
+                      Click="Pull">
+                <MenuItem.Icon>
+                    <Image Source="../img/download.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Clear"
+                      Click="Clear">
+                <MenuItem.Icon>
+                    <Image Source="../img/close.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Init"
+                      Click="Init">
+                <MenuItem.Icon>
+                    <Image Source="../img/refresh.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Release"
+                      Click="Release">
+                <MenuItem.Icon>
+                    <Image Source="../img/refresh.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+        
+        <StackPanel x:Key="CogImage"
+                    Orientation="Horizontal">
+            <Image Source="../img/cog.png"
+                   Width="23" />
+        </StackPanel>
+    
+    </Window.Resources>
+    <Grid x:Name="MainGrid">
+        <Label x:Name="ContestantName"
+               Content="Contestant's Name"
+               HorizontalContentAlignment="Center"
+               Height="45"
+               VerticalAlignment="Top"
+               FontSize="24" />
+        <Grid x:Name="ScoresGrid"
+              HorizontalAlignment="Left"
+              Margin="10,0,0,10"
+              Width="272"
+              Height="346"
+              VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="17*" />
+                <ColumnDefinition Width="110*" />
+                <ColumnDefinition Width="110*" />
+                <ColumnDefinition Width="35*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Label Content="Technique"
+                   Grid.Column="1"
+                   HorizontalContentAlignment="Center" />
+            <Label Content="Presentation"
+                   Grid.Column="2"
+                   HorizontalContentAlignment="Center" />
+            <Label Content="1"
+                   Grid.Row="1" />
+            <Label Content="2"
+                   Grid.Row="2" />
+            <Label Content="3"
+                   Grid.Row="3" />
+            <Label Content="4"
+                   Grid.Row="4" />
+            <Label Content="5"
+                   Grid.Row="5" />
+            <Label Content="6"
+                   Grid.Row="6" />
+            <Label Content="7"
+                   Grid.Row="7" />
+            <Label Content="8"
+                   Grid.Row="8" />
+            <Label Content="9"
+                   Grid.Row="9" />
+            <TextBox x:Name="LScore1"
+                     Grid.Column="1"
+                     Margin="10,3"
+                     Grid.Row="1"
+                     TextWrapping="Wrap"
+                     Text="{Binding Path=Score.Accuracy1, Converter={StaticResource doubleTextConvert}}"
+                     Tag="1"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="0" />
+            <TextBox x:Name="RScore1"
+                     Grid.Column="2"
+                     Margin="10,3"
+                     Grid.Row="1"
+                     TextWrapping="Wrap"
+                     Text="{Binding Path=Score.Presentation1, Converter={StaticResource doubleTextConvert}}"
+                     Tag="1"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="9" />
+            <Button Grid.Column="3"
+                    Grid.Row="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="4,3"
+                    Tag="1"
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
+                    Content="{Binding Source={StaticResource CogImage}}" />
+            <TextBox x:Name="LScore2"
+                     Grid.Column="1"
+                     Margin="10,3,10,3"
+                     Grid.Row="2"
+                     TextWrapping="Wrap"
+                     Text="T2"
+                     Tag="2"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="1" />
+            <TextBox x:Name="RScore2"
+                     Grid.Column="2"
+                     Margin="10,3,10,3"
+                     Grid.Row="2"
+                     TextWrapping="Wrap"
+                     Text="P2"
+                     Tag="2"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="10" />
+            <Button Grid.Column="3"
+                    Grid.Row="2"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="4,3"
+                    Tag="2"
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
+                    Content="{Binding Source={StaticResource CogImage}}" />
+            <TextBox x:Name="LScore3"
+                     Grid.Column="1"
+                     Margin="10,3,10,3"
+                     Grid.Row="3"
+                     TextWrapping="Wrap"
+                     Text="T3"
+                     Tag="3"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="2" />
+            <TextBox x:Name="RScore3"
+                     Grid.Column="2"
+                     Margin="10,3,10,3"
+                     Grid.Row="3"
+                     TextWrapping="Wrap"
+                     Text="P3"
+                     Tag="3"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="11" />
+            <Button Grid.Column="3"
+                    Grid.Row="3"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="4,3"
+                    Tag="3"
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
+                    Content="{Binding Source={StaticResource CogImage}}" />
+            <TextBox x:Name="LScore4"
+                     Grid.Column="1"
+                     Margin="10,3,10,3"
+                     Grid.Row="4"
+                     TextWrapping="Wrap"
+                     Text="T4"
+                     Tag="4"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="3" />
+            <TextBox x:Name="RScore4"
+                     Grid.Column="2"
+                     Margin="10,3,10,3"
+                     Grid.Row="4"
+                     TextWrapping="Wrap"
+                     Text="P4"
+                     Tag="4"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="12" />
+            <Button Grid.Column="3"
+                    Grid.Row="4"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="4,3"
+                    Tag="4"
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
+                    Content="{Binding Source={StaticResource CogImage}}" />
+            <TextBox x:Name="LScore5"
+                     Grid.Column="1"
+                     Margin="10,3,10,3"
+                     Grid.Row="5"
+                     TextWrapping="Wrap"
+                     Text="T5"
+                     Tag="5"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="4" />
+            <TextBox x:Name="RScore5"
+                     Grid.Column="2"
+                     Margin="10,3,10,3"
+                     Grid.Row="5"
+                     TextWrapping="Wrap"
+                     Text="P5"
+                     Tag="5"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="13" />
+            <Button Grid.Column="3"
+                    Grid.Row="5"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="4,3"
+                    Tag="5"
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
+                    Content="{Binding Source={StaticResource CogImage}}" />
+            <TextBox x:Name="LScore6"
+                     Grid.Column="1"
+                     Margin="10,3,10,3"
+                     Grid.Row="6"
+                     TextWrapping="Wrap"
+                     Text="T6"
+                     Tag="6"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="5" />
+            <TextBox x:Name="RScore6"
+                     Grid.Column="2"
+                     Margin="10,3,10,3"
+                     Grid.Row="6"
+                     TextWrapping="Wrap"
+                     Text="P6"
+                     Tag="6"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="14" />
+            <Button Grid.Column="3"
+                    Grid.Row="6"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="4,3"
+                    Tag="6"
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
+                    Content="{Binding Source={StaticResource CogImage}}" />
+            <TextBox x:Name="LScore7"
+                     Grid.Column="1"
+                     Margin="10,3,10,3"
+                     Grid.Row="7"
+                     TextWrapping="Wrap"
+                     Text="T7"
+                     Tag="7"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="6" />
+            <TextBox x:Name="RScore7"
+                     Grid.Column="2"
+                     Margin="10,3,10,3"
+                     Grid.Row="7"
+                     TextWrapping="Wrap"
+                     Text="P7"
+                     Tag="7"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="15" />
+            <Button Grid.Column="3"
+                    Grid.Row="7"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="4,3"
+                    Tag="7"
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
+                    Content="{Binding Source={StaticResource CogImage}}" />
+            <TextBox x:Name="LScore8"
+                     Grid.Column="1"
+                     Margin="10,3,10,3"
+                     Grid.Row="8"
+                     TextWrapping="Wrap"
+                     Text="T8"
+                     Tag="8"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="7" />
+            <TextBox x:Name="RScore8"
+                     Grid.Column="2"
+                     Margin="10,3,10,3"
+                     Grid.Row="8"
+                     TextWrapping="Wrap"
+                     Text="P8"
+                     Tag="8"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="16" />
+            <Button Grid.Column="3"
+                    Grid.Row="8"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="4,3"
+                    Tag="8"
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
+                    Content="{Binding Source={StaticResource CogImage}}" />
+            <TextBox x:Name="LScore9"
+                     Grid.Column="1"
+                     Margin="10,3,10,3"
+                     Grid.Row="9"
+                     TextWrapping="Wrap"
+                     Text="T9"
+                     Tag="9"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="8" />
+            <TextBox x:Name="RScore9"
+                     Grid.Column="2"
+                     Margin="10,3,10,3"
+                     Grid.Row="9"
+                     TextWrapping="Wrap"
+                     Text="P9"
+                     Tag="9"
+                     HorizontalContentAlignment="Center"
+                     KeyboardNavigation.TabIndex="17" />
+            <Button Grid.Column="3"
+                    Grid.Row="9"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="4,3"
+                    Tag="9"
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
+                    Content="{Binding Source={StaticResource CogImage}}" />
+        </Grid>
+        <Grid x:Name="FinalsGrid"
+              Margin="296,0,0,78"
+              HorizontalAlignment="Left"
+              Width="239"
+              Height="243"
+              VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="128*" />
+                <ColumnDefinition Width="111*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <TextBox x:Name="GrandTotalResult"
+                     Text="{Binding Path=GrandTotal}"
+                     Grid.Column="1"
+                     Grid.Row="0"
+                     Margin="10,3" />
+            <TextBox x:Name="MeanResult"
+                     Text="{Binding Path=GrandTotal}"
+                     Grid.Column="1"
+                     Grid.Row="1"
+                     Margin="10,3" />
+            <TextBox x:Name="MinorResult"
+                     Text="{Binding Path=GrandTotal}"
+                     Grid.Column="1"
+                     Grid.Row="2"
+                     Margin="10,3" />
+            <TextBox x:Name="AMinorResult"
+                     Text="{Binding Path=GrandTotal}"
+                     Grid.Column="1"
+                     Grid.Row="3"
+                     Margin="10,3" />
+            <TextBox x:Name="ATotalResult"
+                     Text="{Binding Path=GrandTotal}"
+                     Grid.Column="1"
+                     Grid.Row="4"
+                     Margin="10,3" />
+            <TextBox x:Name="PMinorResult"
+                     Text="{Binding Path=GrandTotal}"
+                     Grid.Column="1"
+                     Grid.Row="5"
+                     Margin="10,3" />
+            <TextBox x:Name="PTotalResult"
+                     Text="{Binding Path=GrandTotal}"
+                     Grid.Column="1"
+                     Grid.Row="6"
+                     Margin="10,3" />
+            <Label Content="Grand Total:"
+                   Grid.Row="0"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center" />
+            <Label Content="Mean:"
+                   Grid.Row="1"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center" />
+            <Label Content="Minor:"
+                   Grid.Row="2"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center" />
+            <Label Content="Presentation Minor:"
+                   Grid.Row="3"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center" />
+            <Label Content="Presentation Total:"
+                   Grid.Row="4"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center" />
+            <Label Content="Accuracy Minor:"
+                   Grid.Row="5"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center" />
+            <Label Content="Accuracy Total:"
+                   Grid.Row="6"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center" />
+        </Grid>
+        <Grid HorizontalAlignment="Stretch"
+              VerticalAlignment="Bottom"
+              Margin="296,0,10,10"
+              Height="50">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="Start"
+                    Grid.Column="0"
+                    Content="Start"
+                    Margin="10,3"
+                    Click="Start_Click" />
+            <Button x:Name="ShowPoints"
+                    Grid.Column="1"
+                    Content="Show Points"
+                    Margin="10,3"
+                    Click="ShowPoints_Click" />
+            <Button x:Name="AcceptScore"
+                    Grid.Column="2"
+                    Content="Accept"
+                    Click="AcceptScore_Click"
+                    Margin="10,3" />
+            <Button x:Name="CloseWindow"
+                    Grid.Column="3"
+                    Content="Close"
+                    Click="CloseWindow_Click"
+                    Margin="10,3" />
+        </Grid>
+    </Grid>
+</Window>
