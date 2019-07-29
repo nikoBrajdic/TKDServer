@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TKD.App.Controllers;
 
 namespace TKD.App.Views
 {
@@ -23,6 +24,7 @@ namespace TKD.App.Views
         public ContestantPage()
         {
             InitializeComponent();
+            DataContext = new DoubleTextConverter();
         }
     }
 }

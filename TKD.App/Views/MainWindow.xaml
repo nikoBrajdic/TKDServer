@@ -10,7 +10,7 @@
         Height="591"
         Width="1082"
         Loaded="Window_Loaded"
-        Closed="TournamentDataWindow_Closed"
+        Closed="Window_Closed"
         Icon="../img/icon.png"
         x:Name="TournamentWindow">
     <Window.Resources>
@@ -26,15 +26,15 @@
                               d:DesignSource="{d:DesignInstance {x:Type Model:PoomsaeType}, CreateList=True}" />
         <CollectionViewSource x:Key="scoreViewSource"
                               d:DesignSource="{d:DesignInstance {x:Type Model:Score}, CreateList=True}" />
-        
-        
+
+
         <Style x:Key="VerticallyAlignCell"
                TargetType="{x:Type DataGridCell}">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type DataGridCell}">
                         <Grid Background="{TemplateBinding Background}">
-                            <ContentPresenter VerticalAlignment="Center" 
+                            <ContentPresenter VerticalAlignment="Center"
                                               HorizontalAlignment="Center" />
                         </Grid>
                     </ControlTemplate>
@@ -55,7 +55,7 @@
                     Value="Center" />
         </Style>
 
-        <ControlTemplate x:Key="CurrCategoryTemplate" 
+        <ControlTemplate x:Key="CurrCategoryTemplate"
                          TargetType="DataGrid">
             <DataGrid CanUserAddRows="False"
                       CanUserDeleteRows="False"
@@ -84,34 +84,118 @@
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTextColumn x:Name="Round1NameColumn" Binding="{Binding Path=Contestant.Name}" Header="Name" Width="110" />
-                    <DataGridTextColumn x:Name="surnameColumn1" Binding="{Binding Path=Contestant.Surname}" Header="Surname" Width="110" />
-                    <DataGridTextColumn x:Name="teamColumn1" Binding="{Binding Path=Contestant.Team}" Header="Team" Width="110" />
-                    <DataGridTextColumn x:Name="MinorMeanColumn" Binding="{Binding Path=Score.MinorMean}" Header="Avg" Width="SizeToHeader" />
-                    <DataGridTextColumn x:Name="GrandTotalColumn" Binding="{Binding Path=Score.GrandTotal}" Header="Grand Total" Width="SizeToHeader" />
-                    <DataGridTextColumn x:Name="MinorTotalColumn" Binding="{Binding Path=Score.MinorTotal}" Header="All" Width="SizeToHeader" />
-                    <DataGridTextColumn x:Name="AccuracyAverageColumn" Binding="{Binding Path=Score.AccuracyMinorTotal}" Header="A Avg" Width="50" />
-                    <DataGridTextColumn x:Name="AccuracyTotalColumn" Binding="{Binding Path=Score.AccuracyGrandTotal}" Header="A All" Width="50" />
-                    <DataGridTextColumn x:Name="Accuracy1Column" Binding="{Binding Path=Score.Accuracy1}" Header="A1" Width="25" />
-                    <DataGridTextColumn x:Name="Accuracy2Column" Binding="{Binding Path=Score.Accuracy2}" Header="A2" Width="25" />
-                    <DataGridTextColumn x:Name="Accuracy3Column" Binding="{Binding Path=Score.Accuracy3}" Header="A3" Width="25" />
-                    <DataGridTextColumn x:Name="Accuracy4Column" Binding="{Binding Path=Score.Accuracy4}" Header="A4" Width="25" />
-                    <DataGridTextColumn x:Name="Accuracy5Column" Binding="{Binding Path=Score.Accuracy5}" Header="A5" Width="25" />
-                    <DataGridTextColumn x:Name="Accuracy6Column" Binding="{Binding Path=Score.Accuracy6}" Header="A6" Width="25" />
-                    <DataGridTextColumn x:Name="Accuracy7Column" Binding="{Binding Path=Score.Accuracy7}" Header="A7" Width="25" />
-                    <DataGridTextColumn x:Name="Accuracy8Column" Binding="{Binding Path=Score.Accuracy8}" Header="A8" Width="25" />
-                    <DataGridTextColumn x:Name="Accuracy9Column" Binding="{Binding Path=Score.Accuracy9}" Header="A9" Width="25" />
-                    <DataGridTextColumn x:Name="PresentationAverageColumn" Binding="{Binding Path=Score.PresentationMinorTotal}" Header="P Avg" Width="50" />
-                    <DataGridTextColumn x:Name="PresentationTotalColumn" Binding="{Binding Path=Score.PresentationGrandTotal}" Header="P All" Width="50" />
-                    <DataGridTextColumn x:Name="Presentation1Column" Binding="{Binding Path=Score.Presentation1}" Header="P1" Width="25" />
-                    <DataGridTextColumn x:Name="Presentation2Column" Binding="{Binding Path=Score.Presentation2}" Header="P2" Width="25" />
-                    <DataGridTextColumn x:Name="Presentation3Column" Binding="{Binding Path=Score.Presentation3}" Header="P3" Width="25" />
-                    <DataGridTextColumn x:Name="Presentation4Column" Binding="{Binding Path=Score.Presentation4}" Header="P4" Width="25" />
-                    <DataGridTextColumn x:Name="Presentation5Column" Binding="{Binding Path=Score.Presentation5}" Header="P5" Width="25" />
-                    <DataGridTextColumn x:Name="Presentation6Column" Binding="{Binding Path=Score.Presentation6}" Header="P6" Width="25" />
-                    <DataGridTextColumn x:Name="Presentation7Column" Binding="{Binding Path=Score.Presentation7}" Header="P7" Width="25" />
-                    <DataGridTextColumn x:Name="Presentation8Column" Binding="{Binding Path=Score.Presentation8}" Header="P8" Width="25" />
-                    <DataGridTextColumn x:Name="Presentation9Column" Binding="{Binding Path=Score.Presentation9}" Header="P9" Width="25" />
+                    <DataGridTextColumn x:Name="Round1NameColumn"
+                                        Binding="{Binding Path=Contestant.Name}"
+                                        Header="Name"
+                                        Width="110" />
+                    <DataGridTextColumn x:Name="surnameColumn1"
+                                        Binding="{Binding Path=Contestant.Surname}"
+                                        Header="Surname"
+                                        Width="110" />
+                    <DataGridTextColumn x:Name="teamColumn1"
+                                        Binding="{Binding Path=Contestant.Team}"
+                                        Header="Team"
+                                        Width="110" />
+                    <DataGridTextColumn x:Name="MinorMeanColumn"
+                                        Binding="{Binding Path=Score.MinorMean}"
+                                        Header="Avg"
+                                        Width="SizeToHeader" />
+                    <DataGridTextColumn x:Name="GrandTotalColumn"
+                                        Binding="{Binding Path=Score.GrandTotal}"
+                                        Header="Grand Total"
+                                        Width="SizeToHeader" />
+                    <DataGridTextColumn x:Name="MinorTotalColumn"
+                                        Binding="{Binding Path=Score.MinorTotal}"
+                                        Header="All"
+                                        Width="SizeToHeader" />
+                    <DataGridTextColumn x:Name="AccuracyAverageColumn"
+                                        Binding="{Binding Path=Score.AccuracyMinorTotal}"
+                                        Header="A Avg"
+                                        Width="50" />
+                    <DataGridTextColumn x:Name="AccuracyTotalColumn"
+                                        Binding="{Binding Path=Score.AccuracyGrandTotal}"
+                                        Header="A All"
+                                        Width="50" />
+                    <DataGridTextColumn x:Name="Accuracy1Column"
+                                        Binding="{Binding Path=Score.Accuracy1}"
+                                        Header="A1"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Accuracy2Column"
+                                        Binding="{Binding Path=Score.Accuracy2}"
+                                        Header="A2"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Accuracy3Column"
+                                        Binding="{Binding Path=Score.Accuracy3}"
+                                        Header="A3"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Accuracy4Column"
+                                        Binding="{Binding Path=Score.Accuracy4}"
+                                        Header="A4"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Accuracy5Column"
+                                        Binding="{Binding Path=Score.Accuracy5}"
+                                        Header="A5"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Accuracy6Column"
+                                        Binding="{Binding Path=Score.Accuracy6}"
+                                        Header="A6"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Accuracy7Column"
+                                        Binding="{Binding Path=Score.Accuracy7}"
+                                        Header="A7"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Accuracy8Column"
+                                        Binding="{Binding Path=Score.Accuracy8}"
+                                        Header="A8"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Accuracy9Column"
+                                        Binding="{Binding Path=Score.Accuracy9}"
+                                        Header="A9"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="PresentationAverageColumn"
+                                        Binding="{Binding Path=Score.PresentationMinorTotal}"
+                                        Header="P Avg"
+                                        Width="50" />
+                    <DataGridTextColumn x:Name="PresentationTotalColumn"
+                                        Binding="{Binding Path=Score.PresentationGrandTotal}"
+                                        Header="P All"
+                                        Width="50" />
+                    <DataGridTextColumn x:Name="Presentation1Column"
+                                        Binding="{Binding Path=Score.Presentation1}"
+                                        Header="P1"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Presentation2Column"
+                                        Binding="{Binding Path=Score.Presentation2}"
+                                        Header="P2"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Presentation3Column"
+                                        Binding="{Binding Path=Score.Presentation3}"
+                                        Header="P3"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Presentation4Column"
+                                        Binding="{Binding Path=Score.Presentation4}"
+                                        Header="P4"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Presentation5Column"
+                                        Binding="{Binding Path=Score.Presentation5}"
+                                        Header="P5"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Presentation6Column"
+                                        Binding="{Binding Path=Score.Presentation6}"
+                                        Header="P6"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Presentation7Column"
+                                        Binding="{Binding Path=Score.Presentation7}"
+                                        Header="P7"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Presentation8Column"
+                                        Binding="{Binding Path=Score.Presentation8}"
+                                        Header="P8"
+                                        Width="25" />
+                    <DataGridTextColumn x:Name="Presentation9Column"
+                                        Binding="{Binding Path=Score.Presentation9}"
+                                        Header="P9"
+                                        Width="25" />
                 </DataGrid.Columns>
             </DataGrid>
         </ControlTemplate>
@@ -121,18 +205,18 @@
               VerticalAlignment="Top"
               IsMainMenu="True">
             <MenuItem Header="_File">
-                <MenuItem x:Name="ItemOpenLog" 
+                <MenuItem x:Name="ItemOpenLog"
                           Header="Open Log"
                           Click="OpenLog" />
                 <MenuItem Header="Hide Display Screen"
                           Click="HideDisplayScreen" />
                 <MenuItem Header="Show Home Screen"
-                          Click="ShowIdlePage"/>
+                          Click="ShowIdlePage" />
             </MenuItem>
         </Menu>
         <TabControl x:Name="MainTabControl"
                     Margin="0,18,0,0">
-            <TabItem x:Name="ContestTab" 
+            <TabItem x:Name="ContestTab"
                      Header="Contest">
                 <Grid Background="#FFE5E5E5">
                     <Label Content="Choose Category:"
@@ -146,11 +230,12 @@
                               Margin="106,5,0,0"
                               Width="422"
                               SelectionChanged="CategoryChosen" />
-                    <TabControl x:Name="ActiveCategoryTabControl" 
+                    <TabControl x:Name="ActiveCategoryTabControl"
                                 Margin="0,30,0,0">
-                        <TabItem x:Name="TabRound1" 
+                        <TabItem x:Name="TabRound1"
                                  Header="Round 1"
-                                 GotFocus="RoundTabGotFocus">
+                                 GotFocus="RoundTabGotFocus"
+                                 IsEnabled="False">
                             <DataGrid x:Name="Round1Contestants"
                                       CanUserAddRows="False"
                                       CanUserDeleteRows="False"
@@ -188,123 +273,142 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Binding="{Binding Path=Contestant.Name}"
                                                         Header="Name"
-                                                        Width="110"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="110"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Contestant.Surname}"
                                                         Header="Surname"
                                                         Width="110"
                                                         HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Contestant.Team}"
                                                         Header="Team"
-                                                        Width="110"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="110"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.MinorMean}"
                                                         Header="Avg"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.GrandTotal}"
                                                         Header="Grand Total"
-                                                        Width="3*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="3*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.MinorTotal}"
                                                         Header="All"
-                                                        Width="3*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="3*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.AccuracyMinorTotal}"
                                                         Header="A Avg"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.AccuracyGrandTotal}"
                                                         Header="A All"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Accuracy1" Binding="{Binding Path=Score.Accuracy1}"
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Accuracy1"
+                                                        Binding="{Binding Path=Score.Accuracy1}"
                                                         Header="A1"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Accuracy2" Binding="{Binding Path=Score.Accuracy2}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Accuracy2"
+                                                        Binding="{Binding Path=Score.Accuracy2}"
                                                         Header="A2"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Accuracy3" Binding="{Binding Path=Score.Accuracy3}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Accuracy3"
+                                                        Binding="{Binding Path=Score.Accuracy3}"
                                                         Header="A3"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Accuracy4" Binding="{Binding Path=Score.Accuracy4}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Accuracy4"
+                                                        Binding="{Binding Path=Score.Accuracy4}"
                                                         Header="A4"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Accuracy5" Binding="{Binding Path=Score.Accuracy5}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Accuracy5"
+                                                        Binding="{Binding Path=Score.Accuracy5}"
                                                         Header="A5"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Accuracy6" Binding="{Binding Path=Score.Accuracy6}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Accuracy6"
+                                                        Binding="{Binding Path=Score.Accuracy6}"
                                                         Header="A6"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Accuracy7" Binding="{Binding Path=Score.Accuracy7}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Accuracy7"
+                                                        Binding="{Binding Path=Score.Accuracy7}"
                                                         Header="A7"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Accuracy8" Binding="{Binding Path=Score.Accuracy8}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Accuracy8"
+                                                        Binding="{Binding Path=Score.Accuracy8}"
                                                         Header="A8"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Accuracy9" Binding="{Binding Path=Score.Accuracy9}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Accuracy9"
+                                                        Binding="{Binding Path=Score.Accuracy9}"
                                                         Header="A9"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.PresentationMinorTotal}"
                                                         Header="P Avg"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.PresentationGrandTotal}"
                                                         Header="P All"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Presentation1" Binding="{Binding Path=Score.Presentation1}"
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Presentation1"
+                                                        Binding="{Binding Path=Score.Presentation1}"
                                                         Header="P1"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Presentation2" Binding="{Binding Path=Score.Presentation2}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Presentation2"
+                                                        Binding="{Binding Path=Score.Presentation2}"
                                                         Header="P2"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Presentation3" Binding="{Binding Path=Score.Presentation3}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Presentation3"
+                                                        Binding="{Binding Path=Score.Presentation3}"
                                                         Header="P3"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Presentation4" Binding="{Binding Path=Score.Presentation4}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Presentation4"
+                                                        Binding="{Binding Path=Score.Presentation4}"
                                                         Header="P4"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Presentation5" Binding="{Binding Path=Score.Presentation5}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Presentation5"
+                                                        Binding="{Binding Path=Score.Presentation5}"
                                                         Header="P5"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Presentation6" Binding="{Binding Path=Score.Presentation6}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Presentation6"
+                                                        Binding="{Binding Path=Score.Presentation6}"
                                                         Header="P6"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Presentation7" Binding="{Binding Path=Score.Presentation7}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Presentation7"
+                                                        Binding="{Binding Path=Score.Presentation7}"
                                                         Header="P7"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Presentation8" Binding="{Binding Path=Score.Presentation8}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Presentation8"
+                                                        Binding="{Binding Path=Score.Presentation8}"
                                                         Header="P8"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round1Presentation9" Binding="{Binding Path=Score.Presentation9}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round1Presentation9"
+                                                        Binding="{Binding Path=Score.Presentation9}"
                                                         Header="P9"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </TabItem>
                         <TabItem x:Name="TabRound2"
                                  Header="Round 2"
                                  Visibility="Visible"
-                                 GotFocus="RoundTabGotFocus">
+                                 GotFocus="RoundTabGotFocus"
+                                 IsEnabled="False">
                             <DataGrid x:Name="Round2Contestants"
                                       CanUserAddRows="False"
                                       CanUserDeleteRows="False"
@@ -345,119 +449,138 @@
                                                         HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Contestant.Surname}"
                                                         Header="Surname"
-                                                        Width="110"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="110"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Contestant.Team}"
                                                         Header="Team"
-                                                        Width="110"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="110"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.MinorMean}"
                                                         Header="Avg"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.GrandTotal}"
                                                         Header="Grand Total"
-                                                        Width="3*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="3*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.MinorTotal}"
                                                         Header="All"
-                                                        Width="3*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="3*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.AccuracyMinorTotal}"
                                                         Header="A Avg"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.AccuracyGrandTotal}"
                                                         Header="A All"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Accuracy1" Binding="{Binding Path=Score.Accuracy1}"
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Accuracy1"
+                                                        Binding="{Binding Path=Score.Accuracy1}"
                                                         Header="A1"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Accuracy2" Binding="{Binding Path=Score.Accuracy2}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Accuracy2"
+                                                        Binding="{Binding Path=Score.Accuracy2}"
                                                         Header="A2"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Accuracy3" Binding="{Binding Path=Score.Accuracy3}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Accuracy3"
+                                                        Binding="{Binding Path=Score.Accuracy3}"
                                                         Header="A3"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Accuracy4" Binding="{Binding Path=Score.Accuracy4}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Accuracy4"
+                                                        Binding="{Binding Path=Score.Accuracy4}"
                                                         Header="A4"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Accuracy5" Binding="{Binding Path=Score.Accuracy5}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Accuracy5"
+                                                        Binding="{Binding Path=Score.Accuracy5}"
                                                         Header="A5"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Accuracy6" Binding="{Binding Path=Score.Accuracy6}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Accuracy6"
+                                                        Binding="{Binding Path=Score.Accuracy6}"
                                                         Header="A6"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Accuracy7" Binding="{Binding Path=Score.Accuracy7}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Accuracy7"
+                                                        Binding="{Binding Path=Score.Accuracy7}"
                                                         Header="A7"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Accuracy8" Binding="{Binding Path=Score.Accuracy8}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Accuracy8"
+                                                        Binding="{Binding Path=Score.Accuracy8}"
                                                         Header="A8"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Accuracy9" Binding="{Binding Path=Score.Accuracy9}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Accuracy9"
+                                                        Binding="{Binding Path=Score.Accuracy9}"
                                                         Header="A9"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.PresentationMinorTotal}"
                                                         Header="P Avg"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.PresentationGrandTotal}"
                                                         Header="P All"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Presentation1" Binding="{Binding Path=Score.Presentation1}"
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Presentation1"
+                                                        Binding="{Binding Path=Score.Presentation1}"
                                                         Header="P1"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Presentation2" Binding="{Binding Path=Score.Presentation2}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Presentation2"
+                                                        Binding="{Binding Path=Score.Presentation2}"
                                                         Header="P2"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Presentation3" Binding="{Binding Path=Score.Presentation3}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Presentation3"
+                                                        Binding="{Binding Path=Score.Presentation3}"
                                                         Header="P3"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Presentation4" Binding="{Binding Path=Score.Presentation4}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Presentation4"
+                                                        Binding="{Binding Path=Score.Presentation4}"
                                                         Header="P4"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Presentation5" Binding="{Binding Path=Score.Presentation5}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Presentation5"
+                                                        Binding="{Binding Path=Score.Presentation5}"
                                                         Header="P5"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Presentation6" Binding="{Binding Path=Score.Presentation6}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Presentation6"
+                                                        Binding="{Binding Path=Score.Presentation6}"
                                                         Header="P6"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Presentation7" Binding="{Binding Path=Score.Presentation7}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Presentation7"
+                                                        Binding="{Binding Path=Score.Presentation7}"
                                                         Header="P7"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Presentation8" Binding="{Binding Path=Score.Presentation8}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Presentation8"
+                                                        Binding="{Binding Path=Score.Presentation8}"
                                                         Header="P8"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round2Presentation9" Binding="{Binding Path=Score.Presentation9}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round2Presentation9"
+                                                        Binding="{Binding Path=Score.Presentation9}"
                                                         Header="P9"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </TabItem>
-                        <TabItem x:Name="TabRound3" 
+                        <TabItem x:Name="TabRound3"
                                  Header="Round 3"
                                  Visibility="Visible"
-                                 GotFocus="RoundTabGotFocus">
+                                 GotFocus="RoundTabGotFocus"
+                                 IsEnabled="False">
                             <DataGrid x:Name="Round3Contestants"
                                       CanUserAddRows="False"
                                       CanUserDeleteRows="False"
@@ -498,112 +621,130 @@
                                                         HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Contestant.Surname}"
                                                         Header="Surname"
-                                                        Width="110"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="110"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Contestant.Team}"
                                                         Header="Team"
-                                                        Width="110"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="110"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.MinorMean}"
                                                         Header="Avg"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.GrandTotal}"
                                                         Header="Grand Total"
-                                                        Width="3*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="3*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.MinorTotal}"
                                                         Header="All"
-                                                        Width="3*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="3*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.AccuracyMinorTotal}"
                                                         Header="A Avg"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.AccuracyGrandTotal}"
                                                         Header="A All"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Accuracy1" Binding="{Binding Path=Score.Accuracy1}"
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Accuracy1"
+                                                        Binding="{Binding Path=Score.Accuracy1}"
                                                         Header="A1"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Accuracy2" Binding="{Binding Path=Score.Accuracy2}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Accuracy2"
+                                                        Binding="{Binding Path=Score.Accuracy2}"
                                                         Header="A2"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Accuracy3" Binding="{Binding Path=Score.Accuracy3}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Accuracy3"
+                                                        Binding="{Binding Path=Score.Accuracy3}"
                                                         Header="A3"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Accuracy4" Binding="{Binding Path=Score.Accuracy4}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Accuracy4"
+                                                        Binding="{Binding Path=Score.Accuracy4}"
                                                         Header="A4"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Accuracy5" Binding="{Binding Path=Score.Accuracy5}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Accuracy5"
+                                                        Binding="{Binding Path=Score.Accuracy5}"
                                                         Header="A5"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Accuracy6" Binding="{Binding Path=Score.Accuracy6}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Accuracy6"
+                                                        Binding="{Binding Path=Score.Accuracy6}"
                                                         Header="A6"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Accuracy7" Binding="{Binding Path=Score.Accuracy7}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Accuracy7"
+                                                        Binding="{Binding Path=Score.Accuracy7}"
                                                         Header="A7"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Accuracy8" Binding="{Binding Path=Score.Accuracy8}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Accuracy8"
+                                                        Binding="{Binding Path=Score.Accuracy8}"
                                                         Header="A8"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Accuracy9" Binding="{Binding Path=Score.Accuracy9}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Accuracy9"
+                                                        Binding="{Binding Path=Score.Accuracy9}"
                                                         Header="A9"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.PresentationMinorTotal}"
                                                         Header="P Avg"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                     <DataGridTextColumn Binding="{Binding Path=Score.PresentationGrandTotal}"
                                                         Header="P All"
-                                                        Width="2*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Presentation1" Binding="{Binding Path=Score.Presentation1}"
+                                                        Width="2*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Presentation1"
+                                                        Binding="{Binding Path=Score.Presentation1}"
                                                         Header="P1"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Presentation2" Binding="{Binding Path=Score.Presentation2}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Presentation2"
+                                                        Binding="{Binding Path=Score.Presentation2}"
                                                         Header="P2"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Presentation3" Binding="{Binding Path=Score.Presentation3}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Presentation3"
+                                                        Binding="{Binding Path=Score.Presentation3}"
                                                         Header="P3"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Presentation4" Binding="{Binding Path=Score.Presentation4}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Presentation4"
+                                                        Binding="{Binding Path=Score.Presentation4}"
                                                         Header="P4"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Presentation5" Binding="{Binding Path=Score.Presentation5}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Presentation5"
+                                                        Binding="{Binding Path=Score.Presentation5}"
                                                         Header="P5"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Presentation6" Binding="{Binding Path=Score.Presentation6}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Presentation6"
+                                                        Binding="{Binding Path=Score.Presentation6}"
                                                         Header="P6"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Presentation7" Binding="{Binding Path=Score.Presentation7}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Presentation7"
+                                                        Binding="{Binding Path=Score.Presentation7}"
                                                         Header="P7"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Presentation8" Binding="{Binding Path=Score.Presentation8}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Presentation8"
+                                                        Binding="{Binding Path=Score.Presentation8}"
                                                         Header="P8"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
-                                    <DataGridTextColumn x:Name="Round3Presentation9" Binding="{Binding Path=Score.Presentation9}"
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
+                                    <DataGridTextColumn x:Name="Round3Presentation9"
+                                                        Binding="{Binding Path=Score.Presentation9}"
                                                         Header="P9"
-                                                        Width="1*"  
-                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}"/>
+                                                        Width="1*"
+                                                        HeaderStyle="{Binding Source={StaticResource CenterGridHeaderStyle}}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </TabItem>
@@ -2090,18 +2231,58 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Settings">
-                <Grid Background="#B7B7B7">
+                <Grid x:Name="SettingsGrid"
+                      Background="#B7B7B7">
                     <TextBox x:Name="RefereeCount"
                              HorizontalAlignment="Left"
                              Height="23"
-                             Margin="71,13,0,0"
+                             Margin="98,13,0,0"
                              TextWrapping="Wrap"
                              VerticalAlignment="Top"
-                             Width="23" />
+                             Width="23"
+                             Text="{Binding Path=RefNo}" />
                     <Label Content="Referees:"
                            HorizontalAlignment="Left"
-                           Margin="10,10,0,0"
-                           VerticalAlignment="Top" />
+                           Margin="7,10,0,0"
+                           VerticalAlignment="Top"
+                           HorizontalContentAlignment="Right"
+                           Width="89" />
+                    <Label Content="IP:"
+                           HorizontalAlignment="Left"
+                           Height="28"
+                           Margin="8,51,0,0"
+                           VerticalAlignment="Top"
+                           Width="89"
+                           HorizontalContentAlignment="Right" />
+                    <TextBox HorizontalAlignment="Left"
+                             Height="23"
+                             Margin="98,54,0,0"
+                             TextWrapping="Wrap"
+                             VerticalAlignment="Top"
+                             Width="125"
+                             Text="{Binding Path=IP}" />
+                    <Button x:Name="ApplyConfigChangesButton"
+                            Content="Apply"
+                            HorizontalAlignment="Left"
+                            Height="36"
+                            Margin="981,468,0,0"
+                            VerticalAlignment="Top"
+                            Width="77"
+                            Click="ApplyConfigChangesButton_Click" />
+                    <Label Content="Contest Name:"
+                           HorizontalAlignment="Left"
+                           Height="28"
+                           Margin="7,92,0,0"
+                           VerticalAlignment="Top"
+                           Width="89"
+                           HorizontalContentAlignment="Right" />
+                    <TextBox HorizontalAlignment="Left"
+                             Height="23"
+                             Margin="98,94,0,0"
+                             TextWrapping="Wrap"
+                             VerticalAlignment="Top"
+                             Width="203"
+                             Text="{Binding Path=ContestName}" />
 
                 </Grid>
             </TabItem>

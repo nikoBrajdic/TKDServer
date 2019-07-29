@@ -12,7 +12,7 @@
         WindowStartupLocation="Manual"
         Loaded="DisplayScreenWindow_Loaded">
     <Grid>
-        <Frame Name="DisplayScreenFrame"
+        <Frame x:Name="DisplayScreenFrame"
                NavigationUIVisibility="Hidden"/>
     </Grid>
 </Window>

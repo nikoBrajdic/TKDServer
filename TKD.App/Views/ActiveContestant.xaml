@@ -5,16 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TKD.App.Controllers"
         mc:Ignorable="d"
-        Title="ActiveContestant"
-        Height="598.768"
-        Width="800"
+        Title="Active Contestant"
+        Height="711.435"
+        Width="1005.5"
         Loaded="Window_Loaded"
-        WindowStyle="None"
-        Icon="../img/icon.png">
+        WindowStyle="SingleBorderWindow"
+        Icon="../img/icon.png"
+        BorderBrush="#FF3F3F46"
+        Closing="NeverClose">
     <Window.Resources>
-        
+
         <local:DoubleTextConverter x:Key="doubleTextConvert" />
-        
+
         <ContextMenu x:Key="CogDialog">
             <MenuItem Header="Pull"
                       Click="Pull">
@@ -41,13 +43,14 @@
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
-        
+
         <StackPanel x:Key="CogImage"
                     Orientation="Horizontal">
-            <Image Source="../img/cog.png"
-                   Width="23" />
+            <Image Width="23" />
         </StackPanel>
-    
+
+        <BitmapImage x:Key="Cog"
+                     UriSource="../img/cog.png" />
     </Window.Resources>
     <Grid x:Name="MainGrid">
         <Label x:Name="ContestantName"
@@ -58,10 +61,10 @@
                FontSize="24" />
         <Grid x:Name="ScoresGrid"
               HorizontalAlignment="Left"
-              Margin="10,0,0,10"
+              Margin="10,45,0,0"
               Width="272"
               Height="346"
-              VerticalAlignment="Bottom">
+              VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="17*" />
                 <ColumnDefinition Width="110*" />
@@ -128,8 +131,9 @@
                     VerticalAlignment="Stretch"
                     Margin="4,3"
                     Tag="1"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
-                    Content="{Binding Source={StaticResource CogImage}}" />
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
+                <Image Source="{StaticResource Cog}" />
+            </Button>
             <TextBox x:Name="LScore2"
                      Grid.Column="1"
                      Margin="10,3,10,3"
@@ -154,8 +158,9 @@
                     VerticalAlignment="Stretch"
                     Margin="4,3"
                     Tag="2"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
-                    Content="{Binding Source={StaticResource CogImage}}" />
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
+                <Image Source="{StaticResource Cog}" />
+            </Button>
             <TextBox x:Name="LScore3"
                      Grid.Column="1"
                      Margin="10,3,10,3"
@@ -180,8 +185,9 @@
                     VerticalAlignment="Stretch"
                     Margin="4,3"
                     Tag="3"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
-                    Content="{Binding Source={StaticResource CogImage}}" />
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
+                <Image Source="{StaticResource Cog}" />
+            </Button>
             <TextBox x:Name="LScore4"
                      Grid.Column="1"
                      Margin="10,3,10,3"
@@ -206,8 +212,9 @@
                     VerticalAlignment="Stretch"
                     Margin="4,3"
                     Tag="4"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
-                    Content="{Binding Source={StaticResource CogImage}}" />
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
+                <Image Source="{StaticResource Cog}" />
+            </Button>
             <TextBox x:Name="LScore5"
                      Grid.Column="1"
                      Margin="10,3,10,3"
@@ -232,8 +239,9 @@
                     VerticalAlignment="Stretch"
                     Margin="4,3"
                     Tag="5"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
-                    Content="{Binding Source={StaticResource CogImage}}" />
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
+                <Image Source="{StaticResource Cog}" />
+            </Button>
             <TextBox x:Name="LScore6"
                      Grid.Column="1"
                      Margin="10,3,10,3"
@@ -258,8 +266,9 @@
                     VerticalAlignment="Stretch"
                     Margin="4,3"
                     Tag="6"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
-                    Content="{Binding Source={StaticResource CogImage}}" />
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
+                <Image Source="{StaticResource Cog}" />
+            </Button>
             <TextBox x:Name="LScore7"
                      Grid.Column="1"
                      Margin="10,3,10,3"
@@ -284,8 +293,9 @@
                     VerticalAlignment="Stretch"
                     Margin="4,3"
                     Tag="7"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
-                    Content="{Binding Source={StaticResource CogImage}}" />
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
+                <Image Source="{StaticResource Cog}" />
+            </Button>
             <TextBox x:Name="LScore8"
                      Grid.Column="1"
                      Margin="10,3,10,3"
@@ -310,8 +320,9 @@
                     VerticalAlignment="Stretch"
                     Margin="4,3"
                     Tag="8"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
-                    Content="{Binding Source={StaticResource CogImage}}" />
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
+                <Image Source="{StaticResource Cog}" />
+            </Button>
             <TextBox x:Name="LScore9"
                      Grid.Column="1"
                      Margin="10,3,10,3"
@@ -336,18 +347,19 @@
                     VerticalAlignment="Stretch"
                     Margin="4,3"
                     Tag="9"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}"
-                    Content="{Binding Source={StaticResource CogImage}}" />
+                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
+                <Image Source="{StaticResource Cog}" />
+            </Button>
         </Grid>
         <Grid x:Name="FinalsGrid"
-              Margin="296,0,0,78"
+              Margin="10,0,0,16"
               HorizontalAlignment="Left"
-              Width="239"
+              Width="237"
               Height="243"
               VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="128*" />
-                <ColumnDefinition Width="111*" />
+                <ColumnDefinition Width="127*" />
+                <ColumnDefinition Width="110*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition />
@@ -453,5 +465,12 @@
                     Click="CloseWindow_Click"
                     Margin="10,3" />
         </Grid>
+        <Rectangle Margin="307,45,21,82"
+                   Stroke="Black">
+            <Rectangle.Fill>
+                <VisualBrush Stretch="Uniform"
+                             Visual="{Binding}" />
+            </Rectangle.Fill>
+        </Rectangle>
     </Grid>
 </Window>

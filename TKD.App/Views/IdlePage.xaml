@@ -11,10 +11,12 @@
 
     <Viewbox>
         <Grid>
-            <Label Foreground="#FF7C1414"
+            <Label x:Name="ContestName" 
+                   Foreground="#FF7C1414"
                    Content="Contest Name"
                    FontSize="5" />
-            <Label Foreground="#FF000044"
+            <Label x:Name="Date" 
+                   Foreground="#FF000044"
                    Content="Current Date"
                    HorizontalContentAlignment="Center"
                    FontSize="4"

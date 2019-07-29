@@ -3,10 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Entity;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -46,11 +52,16 @@ namespace TKD.App
         public static ContestantPage ContestantPage { get; } = new ContestantPage();
         public static IdlePage IdlePage { get; } = new IdlePage();
         public static LogWindow LogWindow { get; } = new LogWindow();
+        public static WebSocketServer WSSV { get; set; }
+        public static Settings Settings { get; set; }
         public Queue<int> Referees { get; set; }
-
         List<string> tableNames;
         bool IsNew = false;
-        public static WebSocketServer WSSV { get; set; }
+        string IP { get => Dns.GetHostEntry(Dns.GetHostName())
+                        .AddressList
+                        .FirstOrDefault(addr => addr.AddressFamily == AddressFamily.InterNetwork)
+                        ?.ToString(); }
+
 
         public MainWindow()
         {
@@ -96,17 +107,20 @@ namespace TKD.App
                 .ToList();
             tableNames.ForEach(name => PrepButtons(false, true, true, true, false, true, false, name));
 
-            ActiveContestantWindow = new ActiveContestant { ParentWindow = this };
+            Settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText("properties.json"));
+            IdlePage.ContestName.Content = Settings.ContestName;
+            IdlePage.Date.Content = DateTime.Today.ToString("dd. MMMM yyyy.", CultureInfo.InvariantCulture);
+            SettingsGrid.DataContext = Settings;
+
+            ActiveContestantWindow = new ActiveContestant { ParentWindow = this, DataContext = DisplayScreen };
             DisplayScreen.DisplayScreenFrame.Content = IdlePage;
             DisplayScreen.Show();
 
-            var settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText("settings.json"));
-            RefereeCount.Text = settings.RefNo.ToString();
-            Referees = new Queue<int>(Enumerable.Range(1, settings.RefNo).ToList());
-            InitServer();
-            TabRound1.IsEnabled = false;
-            TabRound2.IsEnabled = false;
-            TabRound3.IsEnabled = false;
+            Referees = new Queue<int>(Enumerable.Range(1, Settings.RefNo).ToList());
+            BorderThickness = new Thickness(3);
+            BorderBrush = Brushes.Red;
+
+            Task.Run(() => InitServer());
         }
 
         #region buttons
@@ -448,7 +462,11 @@ namespace TKD.App
             };
             for (int i = 0; i < rankings.Count; i++)
             {
-                var listViewItem = new ListViewItem { Content = rankings[i] };
+                var listViewItem = new ListViewItem
+                {
+                    Content = rankings[i],
+                    HorizontalContentAlignment = HorizontalAlignment.Center
+                };
                 switch (i)
                 {
                     case 0: listViewItem.Background = Brushes.Gold; listViewItem.FontSize += 6; break;
@@ -463,8 +481,12 @@ namespace TKD.App
         }
         private void OpenLog(object sender, RoutedEventArgs e) => LogWindow.Show();
 
-        private void TournamentDataWindow_Closed(object sender, EventArgs e)
+        private void Window_Closed(object sender, EventArgs e)
         {
+            Task.Run(() => {
+                //SetIp(dynamic: true);
+                File.WriteAllText("properties.json", JsonConvert.SerializeObject(Settings, Formatting.Indented));
+            });
             ActiveContestantWindow.Close();
             DisplayScreen.Close();
             LogWindow.Close();
@@ -488,15 +510,9 @@ namespace TKD.App
 
         private void InitServer()
         {
-            var IP = Dns.GetHostEntry(Dns.GetHostName())
-                .AddressList
-                .FirstOrDefault(addr => addr.AddressFamily == AddressFamily.InterNetwork)
-                ?.ToString() 
-                ?? "192.168.5.12";
-
-            Console.WriteLine(IP);
-
-            WSSV = new WebSocketServer($"ws://{IP}:8088");
+            WSSV?.Stop();
+            //SetIp();
+            WSSV = new WebSocketServer($"ws://{Settings.IP}:8088");
 
             WSSV.AddWebSocketService("/TKD",
                 () => new TKDClient
@@ -519,6 +535,11 @@ namespace TKD.App
                 }
             );
             WSSV.Start();
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                BorderThickness = new Thickness(0);
+                BorderBrush = Brushes.Transparent;
+            }));
         }
 
         private T Node<T>(string name, UIElement parent = null) => (T)(object)LogicalTreeHelper.FindLogicalNode(parent ?? MainTabControl, name);
@@ -531,6 +552,27 @@ namespace TKD.App
         private void ShowIdlePage(object sender, RoutedEventArgs e)
         {
             DisplayScreen.DisplayScreenFrame.Content = IdlePage;
+        }
+
+        private void ApplyConfigChangesButton_Click(object sender, RoutedEventArgs e)
+        {
+            Task.Run(() => InitServer());
+        }
+        private void SetIp(bool dynamic = false)
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), (dynamic ? "SetDynamic.ps1" : "SetStatic.ps1"));
+            var newProcessInfo = new ProcessStartInfo
+            {
+                UseShellExecute = false,
+                Verb = "runas",
+                FileName = @"C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe",
+                Arguments = $"\"&'{path}'\" -IpAddress {Settings.IP}",
+                CreateNoWindow = true
+            };
+            var proc = new Process { StartInfo = newProcessInfo };
+            proc.Start();
+            while (IP != Settings.IP) Thread.Sleep(100);
+            proc.WaitForExit();
         }
     }
 }

@@ -3,17 +3,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
-using TKD.App.Controllers;
 using TKD.App.Models;
 using TKD.App.Views;
-using TKD.App;
 using WebSocketSharp.Server;
 
 namespace TKD.App
@@ -40,7 +36,7 @@ namespace TKD.App
             InitializeComponent();
 
 #if MVVM
-            DataContext = new DoubleTextConverter();
+            DataContext = new ActiveContestantController();
 #endif            
         }
 
@@ -169,6 +165,7 @@ namespace TKD.App
         }
         private void ShowPoints_Click(object sender, RoutedEventArgs e)
         {
+            DisableUnusedFields();
             bool scoresMissing = false;
             var allScoresL = new List<string>();
             var allScoresP = new List<string>();
@@ -235,6 +232,7 @@ namespace TKD.App
 
             ContestantPage.DisplayTotal.Content = Score.MinorMean;
 
+            GrandTotalResult.Text = Score.MinorMean.ToString();
             MeanResult.Text = Score.MinorMean.ToString();
             MinorResult.Text = Score.MinorTotal.ToString();
             AMinorResult.Text = Score.AccuracyMinorTotal.ToString();
@@ -258,7 +256,7 @@ namespace TKD.App
         private void AcceptScore_Click(object sender, RoutedEventArgs e)
         {
             Context.Scores.Local.Add(Score);
-                Context.SaveChangesAsync();
+            Context.SaveChangesAsync();
             ParentWindow.ScoreViewSource.View.Refresh();
             ParentWindow.Round1Contestants.ItemsSource = ParentWindow.UpdateRound1(Contestant.Category);
             ParentWindow.Round2Contestants.ItemsSource = ParentWindow.PrepList(1, 2, 10);
@@ -301,5 +299,7 @@ namespace TKD.App
         private T Node<T>(string name, UIElement parent = null) => (T) (object) LogicalTreeHelper.FindLogicalNode(parent ?? MainGrid, name);
         private T Get<T>(Type type, object parent, string name) => (T) type.GetProperty(name).GetValue(parent);
         private void Set(Type type, object parent, string name, object value) => type.GetProperty(name).SetValue(parent, value);
+
+        private void NeverClose(object sender, System.ComponentModel.CancelEventArgs e) => Hide();
     }
 }

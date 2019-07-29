@@ -13,5 +13,7 @@ namespace TKD.App.Models
         public int RefNo { get; set; }
         [JsonProperty("ip")]
         public string IP { get; set; }
+        [JsonProperty("contestName")]
+        public string ContestName { get; set; }
     }
 }
