@@ -24,13 +24,13 @@ namespace TKD.App.Models
 
         public string TrackPath { get; set; }
 
-        public int TeamId { get; set; }
+        public bool Active { get; set; }
 
         public int CategoryId { get; set; }
 
-        public bool Active { get; set; }
-
         public virtual Category Category { get; set; }
+
+        public int TeamId { get; set; }
 
         public virtual Team Team { get; set; }
 
@@ -40,5 +40,7 @@ namespace TKD.App.Models
         public int CompareTo(Contestant other) => other.ToString().CompareTo(ToString());
 
         public override string ToString() => $"{Name} {Surname}";
+
+        public string FullName { get => $"{Name} {Surname}"; }
     }
 }

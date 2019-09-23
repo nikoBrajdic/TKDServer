@@ -1,9 +1,10 @@
-﻿//#define MVVM
+﻿#define MVVM
 
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,8 +21,10 @@ namespace TKD.App
         public MainWindow BaseWindow { get; set; }
         public LogWindow LogWindow { get; set; }
         public ActiveContestant ActiveContestantWindow { get; set; }
+        public ActiveContestantController ActiveContestantController { get; set; }
         public ObservableCollection<Device> Devices { get; set; }
         public Queue<int> Referees { get; set; }
+        public TkdModel AppContext { get; set; }
 
         protected override void OnOpen() { base.OnOpen(); }
 
@@ -89,18 +92,32 @@ namespace TKD.App
                         break;
 
 
+                    case "confirm":
+                        DoInMainThread(() => {
+                            new List<string>() { "LScore", "RScore" }.ForEach(score => {
+                                Node<TextBox>($"{score}{Device.Id}", ActiveContestantWindow).BorderBrush = Brushes.Green;
+                                Node<TextBox>($"{score}{Device.Id}", ActiveContestantWindow).BorderThickness = new Thickness(3);
+                            });
+                        });
+                        goto case "score";
+
                     case "score":
 #if MVVM
-                        if (Device.Id == 1)
+                        DoInMainThread(() =>
                         {
-                            DoInMainThread(() =>
-                            {
-                                (ActiveContestantWindow.DataContext as DoubleTextConverter).Score.Accuracy1 = packet.Scores.Accuracy;
-                                (ActiveContestantWindow.DataContext as DoubleTextConverter).Score.Presentation1 = packet.Scores.Presentation;
-                            });
-                            break;
-                        } 
-#endif
+                            var score = AppContext.Scores.Local.First(s => s.Contestant == ActiveContestantWindow.Contestant);
+                            score.SoloScores.First(ss =>
+                                ss.Index == Device.Id &&
+                                ss.Type == "Accuracy"
+                            ).Value = packet.Scores.Accuracy / 10f;
+                            score.SoloScores.First(ss =>
+                                ss.Index == Device.Id &&
+                                ss.Type == "Presentation"
+                            ).Value = packet.Scores.Presentation / 10f;
+                        });
+                        ActiveContestantController.RaisePropertyChanged("Score");
+                        break;
+#else
                         var lval = packet.Astr();
                         var rval = packet.Pstr();
                         Write($"Device {Device.Id} score: {lval} | {rval}.");
@@ -111,7 +128,7 @@ namespace TKD.App
                             typeof(Score).GetProperty($"Presentation{Device.Id}").SetValue(ActiveContestantWindow.Score, double.Parse(rval));
                         });
                         break;
-
+#endif
 
                     default:
                         Write($"Device {Device.Id} says: {packet.Type}.");

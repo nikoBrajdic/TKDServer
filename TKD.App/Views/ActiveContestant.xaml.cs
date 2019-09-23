@@ -1,16 +1,23 @@
-﻿//#define MVVM
+﻿#define MVVM
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using TKD.App.Controllers;
 using TKD.App.Models;
 using TKD.App.Views;
 using WebSocketSharp.Server;
+using System.Data.Entity;
+using ExtensionsNamespace;
+
 
 namespace TKD.App
 {
@@ -21,115 +28,82 @@ namespace TKD.App
     {
         public MainWindow ParentWindow { get; set; }
         public TkdModel Context { get => MainWindow.Context; }
-        public Performer Performer { get; set; }
+        public Performer Performer {
+            get => (DataContext as ActiveContestantController).Performer;
+            set => (DataContext as ActiveContestantController).Performer = value;
+        }
         public Contestant Contestant { get => Performer.Contestant; }
         public Category Category { get => Contestant.Category; }
         public Score Score { get => Performer.Score; }
         public WebSocketServer WSSV { get => MainWindow.WSSV; }
         public ObservableCollection<Device> Devices { get => ParentWindow.ConnectedDevices; }
         private int RefNo { get => int.Parse(ParentWindow.RefereeCount.Text); }
-        private DisplayScreen DisplayScreen { get => MainWindow.DisplayScreen; }
+        private Audience DisplayScreen { get => MainWindow.Audience; }
         private ContestantPage ContestantPage { get => MainWindow.ContestantPage; }
+        private ContestantPage MiniContestantPage { get => MainWindow.MiniContestantPage; }
 
         public ActiveContestant()
         {
             InitializeComponent();
-
-#if MVVM
-            DataContext = new ActiveContestantController();
-#endif            
         }
 
         DispatcherTimer timer;
         bool started = false;
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+
+        private void ResetTextBoxBorders(UIElementCollection control)
         {
-
-
-#if MVVM
-            (DataContext as DoubleTextConverter).Score = Score; 
-#endif
-
-            DisableUnusedFields();
-        }
-
-
-
-        /// <summary>
-        /// COLUMN PART NEEDS TO GO TO CONTESTANT PAGE CONTROLLER
-        /// </summary>
-        private void DisableUnusedFields()
-        {
-            for (int i = 1; i < ScoresGrid.RowDefinitions.Count; i++)
+            foreach (var child in control)
             {
-                foreach (var side in new List<string> { "L", "R" })
+                if (child is Grid)
                 {
-                    var scoreBox = Node<TextBox>($"{side}Score{i}", ScoresGrid);
-                    var thereBox = Node<TextBox>($"{side}{i}", ContestantPage);
-                    var column = Node<ColumnDefinition>($"Column{i}", ContestantPage);
-                    column.Width = new GridLength(1, GridUnitType.Star);
-                    scoreBox.BorderBrush = Brushes.Black;
-                    scoreBox.Background = default;
-                    scoreBox.IsEnabled = true;
-                    thereBox.Background = default;
-                    if (i > RefNo)
+                    foreach (var grandchild in (child as Grid).Children)
                     {
-                        scoreBox.IsEnabled = false;
-                        scoreBox.Background = Brushes.DimGray;
-                        column.Width = new GridLength(0, GridUnitType.Pixel);
+                        if (grandchild is TextBox)
+                        {
+                            (grandchild as TextBox).ClearValue(Border.BorderBrushProperty);
+                            (grandchild as TextBox).ClearValue(Border.BorderThicknessProperty);
+                            (grandchild as TextBox).ClearValue(ForegroundProperty);
+                        }
                     }
                 }
             }
         }
 
-        public void RefreshData()
+        public void LoadContestant()
         {
-
-#if MVVM
-            Performer.Score.Accuracy1 = (DataContext as DoubleTextConverter).Score.Accuracy1;
-            Performer.Score.Presentation1 = (DataContext as DoubleTextConverter).Score.Presentation1;
-
-#endif
+            MirrorWindow.Visual = MiniContestantPage;
+            ResetTextBoxBorders(ScoresGrid.Children);
+            ResetTextBoxBorders(ContestantPage.ScoresGrid.Children);
+            ResetTextBoxBorders((MirrorWindow.Visual as ContestantPage).ScoresGrid.Children);
+            (DataContext as ActiveContestantController).Score = Score;
 #region init client scores
             foreach (var device in Devices.Where(d => d.Handle.Ping() && d.Enabled))
             {
                 var i = device.Id;
-                var lScore = 10*Get<double?>(typeof(Score), Performer.Score, $"Accuracy{i}") ?? (Category.IsFreestyle ? 60 : 40);
-                var rScore = 10*Get<double?>(typeof(Score), Performer.Score, $"Presentation{i}") ?? (Category.IsFreestyle ? 40 : 60);
+                var lScore = 10 * Score.SoloScores?.FirstOrDefault(ss => 
+                    ss.Type == "Accuracy" && 
+                    ss.Index == i)?.Value ?? (Category.IsFreestyle ? 60 : 40);
+                var rScore = 10 * Score.SoloScores?.FirstOrDefault(ss => 
+                    ss.Type == "Presentation" && 
+                    ss.Index == i)?.Value ?? (Category.IsFreestyle ? 40 : 60);
                 var scores = new Scores(Convert.ToInt32(lScore), Convert.ToInt32(rScore));
                 var serialised = OutboundPacket.Instructions("init", setScores: scores);
                 device.Handle.SendAsync(serialised, null);
             }
 #endregion
-
 #region refresh display screen
             var currRound = Category.CurrentRound;
             var index = Score.Index;
-            ContestantPage.DisplayContestantName.Content = Contestant.ToString();
-            ContestantPage.DisplayTeamName.Content = Contestant.Team;
-            ContestantPage.DisplayPoomsaeName.Content = Get<Poomsae>(typeof(Category), Category, $"Poomsae{currRound}{index}");
-            DisplayScreen.DisplayScreenFrame.Content = ContestantPage;
-            ContestantPage.DisplayTotal.Content = "";
-            ContestantPage.DisplayTimer.Content = "1:30";
-            ContestantName.Content = Contestant.ToString();
-#endregion
-
-#region set score fields
-            for (int i = 1; i < ScoresGrid.RowDefinitions.Count; i++)
+            foreach (var page in new List<ContestantPage>() { ContestantPage, MiniContestantPage })
             {
-#if MVVM
-                if (i == 1) continue; 
-#endif
-                foreach (var side in new List<string> { "L", "R" })
-                {
-                    var hereBox = Node<TextBox>($"{side}Score{i}", ScoresGrid);
-                    var thereBox = Node<TextBox>($"{side}{i}", ContestantPage);
-                    var criterion = side == "L" ? "Accuracy" : "Presentation";
-                    hereBox.Text = Get<double?>(typeof(Score), Score, $"{criterion}{i}")?.ToString();
-                    thereBox.Text = hereBox.Text;
-                }
+                page.DisplayPoomsaeName.Content = Category.CategoryPoomsaes
+                        .FirstOrDefault(cp => cp.Round == Category.CurrentRound && cp.Index == index)?.Poomsae.Name;
+                page.DisplayTotal.Content = "";
+                page.DisplayTimer.Content = "1:30";
             }
+            DisplayScreen.DisplayScreenFrame.Content = ContestantPage;
+            MirrorWindow.Visual = MiniContestantPage;
 #endregion
         }
 
@@ -152,6 +126,7 @@ namespace TKD.App
                 delegate
                 {
                     ContestantPage.DisplayTimer.Content = timeSpan.ToString(@"mm\:ss");
+                    MiniContestantPage.DisplayTimer.Content = timeSpan.ToString(@"mm\:ss");
                     if (timeSpan == TimeSpan.Zero) timer.Stop();
                     timeSpan += TimeSpan.FromSeconds(-1);
                 },
@@ -163,89 +138,74 @@ namespace TKD.App
             Start.Content = "Stop";
             CloseWindow.IsEnabled = false;
         }
+        private void CalculatePoints(UIElementCollection children, bool calculate = true)
+        {
+            ResetTextBoxBorders(children);
+            var allTextBoxes = new List<TextBox>();
+            var allTextBoxesL = children.MapIf(c => c is Grid && c.Visibility == Visibility.Visible, c => (c as Grid).Children[1] as TextBox);
+            var allTextBoxesR = children.MapIf(c => c is Grid && c.Visibility == Visibility.Visible, c => (c as Grid).Children[2] as TextBox);
+
+            allTextBoxes.AddRange(allTextBoxesL);
+            allTextBoxes.AddRange(allTextBoxesR);
+            var redCells = new List<TextBox>()
+            {
+                allTextBoxesL.Find(tb => double.Parse(tb.Text) == allTextBoxesL.Min(b => double.Parse(b.Text))),
+                allTextBoxesR.Find(tb => double.Parse(tb.Text) == allTextBoxesR.Min(b => double.Parse(b.Text)))
+            };
+            allTextBoxesL.Reverse();
+            allTextBoxesR.Reverse();
+            redCells.Add(allTextBoxesL.Find(tb => double.Parse(tb.Text) == allTextBoxesL.Max(b => double.Parse(b.Text))));
+            redCells.Add(allTextBoxesR.Find(tb => double.Parse(tb.Text) == allTextBoxesR.Max(b => double.Parse(b.Text))));
+            foreach (var textBox in redCells)
+            {
+                textBox.BorderBrush = Brushes.Red;
+                textBox.Foreground = Brushes.Gray;
+            }
+            if (calculate)
+            {
+                Score.DisAccuracyGrandTotal = allTextBoxesL.Sum(tb => double.Parse(tb.Text));
+                Score.DisAccuracyMinorTotal = allTextBoxesL.Where(tb => !redCells.Contains(tb)).Sum(tb => double.Parse(tb.Text));
+                Score.DisPresentationGrandTotal = allTextBoxesR.Sum(tb => double.Parse(tb.Text));
+                Score.DisPresentationMinorTotal = allTextBoxesR.Where(tb => !redCells.Contains(tb)).Sum(tb => double.Parse(tb.Text));
+                Score.DisGrandTotal = Score.DisAccuracyGrandTotal + Score.DisPresentationGrandTotal;
+                Score.DisMinorTotal = Score.DisAccuracyMinorTotal + Score.DisPresentationMinorTotal;
+                Score.DisMinorMean = Score.DisMinorTotal / 2 / (RefNo - (redCells.All(it => it != null) ? redCells.Count / 2 : 0));
+                // has to be here because i haven't implemented OnPropertyChanged for it yet.
+                ContestantPage.DisplayTotal.Content = ((double)Score.MinorMean).ToString("0.00");
+                MiniContestantPage.DisplayTotal.Content = ((double)Score.MinorMean).ToString("0.00");
+                // successfully
+                (DataContext as ActiveContestantController).RaisePropertyChanged("Score");
+
+                var arr = allTextBoxes.Select(tb => tb.Text + (redCells.Contains(tb) ? "R" : "")).ToArray();
+                var count = arr.Length / 2;
+                var scoreString = string.Join(" ", arr, 0, count) + "::" + string.Join(" ", arr, count, count);
+                WSSV.WebSocketServices["/TKD"].Sessions.BroadcastAsync(OutboundPacket.Instructions("all_scores", message: scoreString), null);
+            }
+        }
         private void ShowPoints_Click(object sender, RoutedEventArgs e)
         {
-            DisableUnusedFields();
-            bool scoresMissing = false;
-            var allScoresL = new List<string>();
-            var allScoresP = new List<string>();
-            foreach (var item in new List<string> { "Accuracy", "Presentation" })
-            {
-                var left = item == "Accuracy";
-                var lowestHereScore   = left ? LScore1 : RScore1;
-                var highestHereScore  = left ? LScore2 : RScore2;
-                var lowestThereScore  = left ? ContestantPage.L1 : ContestantPage.R1;
-                var highestThereScore = left ? ContestantPage.L2 : ContestantPage.R2;
-                var allScores         = left ? allScoresL : allScoresP;
-                var side              = left ? "L" : "R";
-                double.TryParse(lowestHereScore.Text, out double lowest);
-                double.TryParse(highestHereScore.Text, out double highest);
-                double currTotal = 0;
-                for (int i = 1; i <= RefNo; i++)
-                {
-                    var thereBox = Node<TextBox>($"{side}{i}", ContestantPage);
-                    var hereBox = Node<TextBox>($"{side}Score{i}");
-                    thereBox.Text = double.Parse(hereBox.Text).ToString("0.0");
-
-                    bool pass = double.TryParse(hereBox.Text, out double currScore);
-                    if (pass && currScore <= lowest)
-                    {
-                        lowestHereScore = hereBox;
-                        lowestThereScore = thereBox;
-                        lowest = currScore;
-                    }
-                    if (pass && currScore >= highest)
-                    {
-                        highestHereScore = hereBox;
-                        highestThereScore = thereBox;
-                        highest = currScore;
-                    }
-                    scoresMissing = scoresMissing || !pass;
-                    currTotal += currScore;
-                    allScores.Add(currScore.ToString("0.0"));
-
-                    Set(typeof(Score), Score, $"{item}{i}", currScore == 0 ? (double?)null : currScore);
-                }
-                Set(typeof(Score), Score, $"{item}GrandTotal", currTotal);
-                Set(typeof(Score), Score, $"{item}MinorTotal", currTotal - lowest - highest);
-                lowestHereScore.BorderBrush = Brushes.Red;
-                highestHereScore.BorderBrush = Brushes.Red;
-                lowestThereScore.Background = Brushes.Salmon;
-                highestThereScore.Background = Brushes.Salmon;
-                allScores[int.Parse(lowestHereScore.Tag.ToString())-1] += 'R';
-                allScores[int.Parse(highestHereScore.Tag.ToString())-1] += 'R';
-            }
-
-            if (scoresMissing)
-            {
-                MessageBox.Show("Scores missing! Either force pull from devices or add manually!",
-                                "Missing Scores",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
-                return;
-            }
-            var allScoresFinal = string.Join(" ", allScoresL) + "::" + string.Join(" ", allScoresP);
-            WSSV.WebSocketServices["/TKD"].Sessions.BroadcastAsync(OutboundPacket.Instructions("all_scores", message: allScoresFinal), null);
-            Score.GrandTotal = Score.AccuracyGrandTotal + Score.PresentationGrandTotal;
-            Score.MinorTotal = Score.AccuracyMinorTotal + Score.PresentationMinorTotal;
-            Score.MinorMean = Math.Round((double)Score.MinorTotal / (RefNo > 3 ? RefNo - 2 : RefNo), 2);
-
-            ContestantPage.DisplayTotal.Content = Score.MinorMean;
-
-            GrandTotalResult.Text = Score.MinorMean.ToString();
-            MeanResult.Text = Score.MinorMean.ToString();
-            MinorResult.Text = Score.MinorTotal.ToString();
-            AMinorResult.Text = Score.AccuracyMinorTotal.ToString();
-            ATotalResult.Text = Score.AccuracyGrandTotal.ToString();
-            PMinorResult.Text = Score.PresentationMinorTotal.ToString();
-            PTotalResult.Text = Score.PresentationGrandTotal.ToString();
+            CalculatePoints(ScoresGrid.Children);
+            CalculatePoints(ContestantPage.ScoresGrid.Children, false);
+            CalculatePoints(MiniContestantPage.ScoresGrid.Children, false);
         }
         private void CloseWindow_Click(object sender, RoutedEventArgs e)
         {
             SetClientsIdle(true);
             Hide();
-            DisableUnusedFields();
-            Context.Entry(Score).Reload();
+            var soloScores = Context.SoloScores.Local.Where(ss => ss.Score == Score).ToList();
+            if (Context.Entry(Score).State == EntityState.Added)
+            {
+                foreach (var ss in soloScores) Context.SoloScores.Local.Remove(ss);
+                Context.Scores.Local.Remove(Score);
+            }
+            else
+            {
+                foreach (var ss in soloScores) Context.Entry(ss).Reload();
+                Context.Entry(Score).Reload();
+            }
+            Context.SaveChanges();
+                
+            ParentWindow.UpdateContestants(Contestant.Category);
         }
 
         private void SetClientsIdle(bool idle)
@@ -255,50 +215,86 @@ namespace TKD.App
 
         private void AcceptScore_Click(object sender, RoutedEventArgs e)
         {
-            Context.Scores.Local.Add(Score);
-            Context.SaveChangesAsync();
-            ParentWindow.ScoreViewSource.View.Refresh();
-            ParentWindow.Round1Contestants.ItemsSource = ParentWindow.UpdateRound1(Contestant.Category);
-            ParentWindow.Round2Contestants.ItemsSource = ParentWindow.PrepList(1, 2, 10);
-            ParentWindow.Round3Contestants.ItemsSource = ParentWindow.PrepList(2, 3, 8);
+            (DataContext as ActiveContestantController).RaisePropertyChanged("Score");
             SetClientsIdle(true);
             ShowPoints_Click(sender, e);
             Hide();
-            DisableUnusedFields();
+            if (Context.Entry(Score).State == EntityState.Added)
+            {
+                Context.Scores.Local.Add(Score);
+            }
+            Context.SaveChanges();
+            ParentWindow.ScoreViewSource.View.Refresh();
+            ParentWindow.Round1Contestants.ItemsSource = ParentWindow.UpdateContestants(Contestant.Category);
+            ParentWindow.Round2Contestants.ItemsSource = ParentWindow.PrepList(1, 2, 10);
+            ParentWindow.Round3Contestants.ItemsSource = ParentWindow.PrepList(2, 3, 8);
         }
 
         private void Pull(object sender, RoutedEventArgs e)
         {
-            MainWindow.LogWindow.LogBox.Text += "Pulled";
-            MainWindow.LogWindow.LogBox.ScrollToEnd();
             var ID = int.Parse((((sender as MenuItem).Parent as ContextMenu).PlacementTarget as Button).Tag.ToString());
             Devices.First(d => d.Id == ID).Handle.Send(OutboundPacket.Instructions("scores", scores: true));
+            MainWindow.LogWindow.Log("Pulled");
         }
         private void Clear(object sender, RoutedEventArgs e)
         {
-            MainWindow.LogWindow.LogBox.Text += "Cleared";
-            MainWindow.LogWindow.LogBox.ScrollToEnd();
+            var ID = int.Parse((((sender as MenuItem).Parent as ContextMenu).PlacementTarget as Button).Tag.ToString());
+            Devices.First(d => d.Id == ID).Handle.Send(OutboundPacket.Instructions("init", scores: true));
+            MainWindow.LogWindow.Log("Cleared");
         }
         private void Init(object sender, RoutedEventArgs e)
         {
             var scores = Category.IsFreestyle ? new Scores(60, 40) : new Scores(40, 60);
             var ID = int.Parse((((sender as MenuItem).Parent as ContextMenu).PlacementTarget as Button).Tag.ToString());
             Devices.First(d => d.Id == ID).Handle.Send(OutboundPacket.Instructions("init", setScores: scores));
-            MainWindow.LogWindow.LogBox.Text += $"Initialised #{ID}";
-            MainWindow.LogWindow.LogBox.ScrollToEnd();
-            Node<TextBox>($"LScore{ID}", ScoresGrid).Text = (scores.Accuracy / 10f).ToString("0.0");
-            Node<TextBox>($"RScore{ID}", ScoresGrid).Text = (scores.Presentation / 10f).ToString("0.0");
+            ((ScoresGrid.Children[ID + 2] as Grid).Children[1] as TextBox).Text = (scores.Accuracy / 10f).ToString("0.0");
+            ((ScoresGrid.Children[ID + 2] as Grid).Children[2] as TextBox).Text = (scores.Presentation / 10f).ToString("0.0");
+            MainWindow.LogWindow.Log($"Initialised #{ID}");
         }
         private void Release(object sender, RoutedEventArgs e)
         {
             var ID = int.Parse((((sender as MenuItem).Parent as ContextMenu).PlacementTarget as Button).Tag.ToString());
             Devices.First(d => d.Id == ID).Handle.Send(OutboundPacket.Instructions("disconnect"));
-            MainWindow.LogWindow.LogBox.Text += "Released";
-            MainWindow.LogWindow.LogBox.ScrollToEnd();
+            MainWindow.LogWindow.Log("Released");
         }
-        private T Node<T>(string name, UIElement parent = null) => (T) (object) LogicalTreeHelper.FindLogicalNode(parent ?? MainGrid, name);
-        private T Get<T>(Type type, object parent, string name) => (T) type.GetProperty(name).GetValue(parent);
-        private void Set(Type type, object parent, string name, object value) => type.GetProperty(name).SetValue(parent, value);
+
+        private readonly Regex Regex = new Regex(@"(?:^\d|^\.\d|^\d\.\d?)$");
+        private void TextBoxTextChanged(object sender, EventArgs e)
+        {
+            var textBox = sender as TextBox;
+            textBox.Text = textBox.Text.Replace(",", ".");
+            var text = textBox.Text;
+            if (text.Length > 0)
+                textBox.CaretIndex = text.Length;
+            if (!Regex.IsMatch(text))
+            {
+                textBox.Background = Brushes.LightSalmon;
+                return;
+            }
+            textBox.ClearValue(BackgroundProperty);
+        }
+        private void TextBoxKeyPress(object sender, KeyEventArgs e)
+        {
+            var keyVal = new KeyConverter().ConvertToString(e.Key);
+            switch (e.Key)
+            {
+                case Key.Tab: keyVal = "\t"; break;
+                case Key.OemPeriod:
+                case Key.Decimal:
+                case Key.OemComma: keyVal = "."; break;
+                case Key.Left:
+                case Key.Right: 
+                case Key.Delete:
+                case Key.Back: return;
+            }
+            var text = (sender as TextBox).Text;
+            var match = Regex.IsMatch(text);
+            
+            if (!Regex.IsMatch(keyVal, @"[\t\.\d]") || (keyVal == "\t" && !match))
+            {
+                e.Handled = true;
+            }
+        }
 
         private void NeverClose(object sender, System.ComponentModel.CancelEventArgs e) => Hide();
     }

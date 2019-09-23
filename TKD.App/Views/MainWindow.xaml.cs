@@ -7,8 +7,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -19,10 +17,13 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using TKD.App.Controllers;
 using TKD.App.Models;
 using TKD.App.Views;
 using WebSocketSharp.Server;
 using FontFamily = System.Windows.Media.FontFamily;
+using static System.Linq.Enumerable;
+using System.Text.RegularExpressions;
 
 namespace TKD.App
 {
@@ -46,21 +47,24 @@ namespace TKD.App
         public ObservableCollection<Team> Teams { get => Context.Teams.Local; }
         public ObservableCollection<Device> ConnectedDevices { get; } = new ObservableCollection<Device>();
         public static TkdModel Context { get; } = new TkdModel();
-        public static ActiveContestant ActiveContestantWindow { get; set; }
-        public static DisplayScreen DisplayScreen { get; } = new DisplayScreen();
+        public static ActiveContestantController ActiveContestantController { get; } = new ActiveContestantController();
+        public static ActiveContestant ActiveContestantWindow { get; } = new ActiveContestant();
+        public static Audience Audience { get; } = new Audience();
         public static RankingsPage RankingsPage { get; } = new RankingsPage();
         public static ContestantPage ContestantPage { get; } = new ContestantPage();
+        public static ContestantPage MiniContestantPage { get; } = new ContestantPage();
         public static IdlePage IdlePage { get; } = new IdlePage();
         public static LogWindow LogWindow { get; } = new LogWindow();
         public static WebSocketServer WSSV { get; set; }
         public static Settings Settings { get; set; }
         public Queue<int> Referees { get; set; }
-        List<string> tableNames;
-        bool IsNew = false;
-        string IP { get => Dns.GetHostEntry(Dns.GetHostName())
+        string IP
+        {
+            get => Dns.GetHostEntry(Dns.GetHostName())
                         .AddressList
                         .FirstOrDefault(addr => addr.AddressFamily == AddressFamily.InterNetwork)
-                        ?.ToString(); }
+                        ?.ToString();
+        }
 
 
         public MainWindow()
@@ -72,15 +76,19 @@ namespace TKD.App
             PoomsaeTypeViewSource = (CollectionViewSource) FindResource("poomsaeTypeViewSource");
             ScoreViewSource       = (CollectionViewSource) FindResource("scoreViewSource");
             TeamViewSource        = (CollectionViewSource) FindResource("teamViewSource");
+
+            Settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText("properties.json"));
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Context.Categories.Load();
+            Context.CategoryPoomsaes.Load();
             Context.Contestants.Load();
             Context.Poomsaes.Load();
             Context.PoomsaeTypes.Load();
             Context.Scores.Load();
+            Context.SoloScores.Load();
             Context.Teams.Load();
 
             CategoryViewSource.Source = Categories;
@@ -97,33 +105,31 @@ namespace TKD.App
                 Poomsae11ComboBox, Poomsae12ComboBox, Poomsae21ComboBox,
                 Poomsae22ComboBox, Poomsae31ComboBox, Poomsae32ComboBox
             }.ForEach(box => box.ItemsSource = Poomsaes);
-
             ChooseCategory.ItemsSource = Categories.Where(c => c.Contestants.Count(con => con.Active) > 0);
 
-            tableNames = Context.Database
+            Context.Database
                 .SqlQuery<string>("SELECT name FROM sys.tables ORDER BY name")
-                .Where(t => !(t.Contains("MigrationsHistory") || t == "sysdiagrams"))
+                .Where(t => !(t.StartsWith("__") || t == "sysdiagrams" || t == "SoloScores" || t == "CategoryPoomsaes"))
                 .Select(n => n.EndsWith("ies") ? n.Replace("ies", "y") : n.TrimEnd('s'))
-                .ToList();
-            tableNames.ForEach(name => PrepButtons(false, true, true, true, false, true, false, name));
+                .ToList()
+                .ForEach(name => PrepButtons(false, true, true, true, false, true, false, name));
 
-            Settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText("properties.json"));
-            IdlePage.ContestName.Content = Settings.ContestName;
-            IdlePage.Date.Content = DateTime.Today.ToString("dd. MMMM yyyy.", CultureInfo.InvariantCulture);
+            IdlePage.DataContext = Settings;
             SettingsGrid.DataContext = Settings;
+            ActiveContestantWindow.ParentWindow = this;
+            ActiveContestantWindow.DataContext = ActiveContestantController;
+            ContestantPage.DataContext = ActiveContestantController;
+            MiniContestantPage.DataContext = ActiveContestantController;
+            Audience.DisplayScreenFrame.Content = IdlePage;
 
-            ActiveContestantWindow = new ActiveContestant { ParentWindow = this, DataContext = DisplayScreen };
-            DisplayScreen.DisplayScreenFrame.Content = IdlePage;
-            DisplayScreen.Show();
-
-            Referees = new Queue<int>(Enumerable.Range(1, Settings.RefNo).ToList());
+            Referees = new Queue<int>(Range(1, Settings.RefNo));
             BorderThickness = new Thickness(3);
             BorderBrush = Brushes.Red;
 
             Task.Run(() => InitServer());
         }
 
-        #region buttons
+#region buttons
         // ------------------------------ NEW -----------------------------------
         private void NewCategory_Click(object sender, RoutedEventArgs e) => NewEntry<Category>();
         private void NewContestant_Click(object sender, RoutedEventArgs e) => NewEntry<Contestant>();
@@ -134,7 +140,6 @@ namespace TKD.App
 
         private void NewEntry<T>()
         {
-            IsNew = true;
             var type = typeof(T).Name;
             object @new;
             switch (type)
@@ -194,30 +199,38 @@ namespace TKD.App
                 switch (item)
                 {
                     case Category ctgr:
-                        ctgr.Poomsae11ID = (Poomsae11ComboBox.SelectedItem as Poomsae)?.ID ?? null;
-                        ctgr.Poomsae12ID = (Poomsae12ComboBox.SelectedItem as Poomsae)?.ID ?? null;
-                        ctgr.Poomsae21ID = (Poomsae21ComboBox.SelectedItem as Poomsae)?.ID ?? null;
-                        ctgr.Poomsae22ID = (Poomsae22ComboBox.SelectedItem as Poomsae)?.ID ?? null;
-                        ctgr.Poomsae31ID = (Poomsae31ComboBox.SelectedItem as Poomsae)?.ID ?? null;
-                        ctgr.Poomsae32ID = (Poomsae32ComboBox.SelectedItem as Poomsae)?.ID ?? null;
+                        Context.CategoryPoomsaes.AddRange(new CategoryPoomsae[]
+                        {
+                            new CategoryPoomsae { Round = 1, Index = 1, Category = ctgr, Poomsae = Poomsae11ComboBox.SelectedItem as Poomsae },
+                            new CategoryPoomsae { Round = 1, Index = 2, Category = ctgr, Poomsae = Poomsae12ComboBox.SelectedItem as Poomsae },
+                            new CategoryPoomsae { Round = 2, Index = 1, Category = ctgr, Poomsae = Poomsae21ComboBox.SelectedItem as Poomsae },
+                            new CategoryPoomsae { Round = 2, Index = 2, Category = ctgr, Poomsae = Poomsae22ComboBox.SelectedItem as Poomsae },
+                            new CategoryPoomsae { Round = 3, Index = 1, Category = ctgr, Poomsae = Poomsae31ComboBox.SelectedItem as Poomsae },
+                            new CategoryPoomsae { Round = 3, Index = 2, Category = ctgr, Poomsae = Poomsae32ComboBox.SelectedItem as Poomsae }
+                        });
                         break;
                     case Contestant ctnt:
-                        ctnt.TeamId = (TeamComboBox.SelectedItem as Team).ID;
-                        ctnt.CategoryId = (CategoryComboBox.SelectedItem as Category).ID;
+                        ctnt.Team = TeamComboBox.SelectedItem as Team;
+                        ctnt.Category = CategoryComboBox.SelectedItem as Category;
                         break;
                     case Poomsae p:
-                        p.PoomsaeTypeId = (PoomsaeTypeComboBox.SelectedItem as PoomsaeType).ID;
+                        p.PoomsaeType = PoomsaeTypeComboBox.SelectedItem as PoomsaeType;
                         break;
                     case Score s:
-                        s.ContestantId = (Contestants.FirstOrDefault(c => c.ToString() == ScoreNameTextBox.Text)).ID;
+                        s.Contestant = Contestants.FirstOrDefault(c => c.FullName == ScoreNameTextBox.Text);
                         break;
                     default:
                         break;
                 }
-                Context.SaveChangesAsync();
+                Context.SaveChanges();
                 ChooseCategory.ItemsSource = Categories.Where(c => c.Contestants.Count(con => con.Active) > 0);
                 viewSource.View.Refresh();
-
+                switch (item)
+                {
+                    case Contestant ctnt: UpdateCategory(ctnt.Category); break;
+                    case Score s: UpdateCategory(s.Contestant.Category); break;
+                }
+                UpdateCategory(ChooseCategory.SelectedItem as Category);
                 PrepButtons(false, true, true, true, false, true, false, type);
                 Dispatcher.BeginInvoke(new Action(() =>
                         ((DataGrid)LogicalTreeHelper.FindLogicalNode(MainTabControl, $"{type}DataGrid")).Focus()),
@@ -227,7 +240,6 @@ namespace TKD.App
             {
                 MessageBox.Show(x.Message);
             }
-            IsNew = false;
         }
         
         // ------------------------------ EDIT -----------------------------------
@@ -265,10 +277,19 @@ namespace TKD.App
             var viewSource = typeof(MainWindow).GetField($"{type}ViewSource").GetValue(this) as CollectionViewSource;
             if (viewSource.View.CurrentItem != null)
             {
+                if (type == "Score")
+                {
+                    Context.SoloScores.RemoveRange(Context.Entry(viewSource.View.CurrentItem as Score).Entity.SoloScores);
+                }
+                if (type == "Category")
+                {
+                    Context.CategoryPoomsaes.RemoveRange(Context.Entry(viewSource.View.CurrentItem as Category).Entity.CategoryPoomsaes);
+                }
                 Context.Set(typeof(T)).Local.Remove((T) viewSource.View.CurrentItem);
-                Context.SaveChangesAsync();
+                Context.SaveChanges();
             }
             viewSource.View.Refresh();
+            UpdateCategory(ChooseCategory.SelectedItem as Category);
             Dispatcher.BeginInvoke(new Action(() =>
                     ((DataGrid)LogicalTreeHelper.FindLogicalNode(MainTabControl, $"{type}DataGrid")).Focus()),
                 DispatcherPriority.Input);
@@ -285,10 +306,9 @@ namespace TKD.App
             var type = typeof(T).Name;
             var viewSource = typeof(MainWindow).GetField($"{type}ViewSource").GetValue(this) as CollectionViewSource;
             var current = (T)viewSource.View.CurrentItem;
-            if (IsNew)
+            if (Context.Entry(current).State == EntityState.Added)
             {
                 Context.Set(typeof(T)).Remove(current);
-                IsNew = false;
             }
             else
             {
@@ -312,7 +332,7 @@ namespace TKD.App
             Node<Button>($"Cancel{name}").IsEnabled = cancelBtn;
         }
         // -------------------------------------------------------------------------
-        #endregion
+#endregion
 
         void GridUnloaded(object sender, RoutedEventArgs e) => ((DataGrid)sender).CommitEdit(DataGridEditingUnit.Row, true);
 
@@ -322,27 +342,26 @@ namespace TKD.App
             TabRound2.IsEnabled = true;
             TabRound3.IsEnabled = true;
 
-            var RefNo = int.Parse(RefereeCount.Text);
             var chosenCategory = ChooseCategory.SelectedItem as Category;
-            Round1Contestants.ItemsSource = UpdateRound1(chosenCategory);
-            Round2Contestants.ItemsSource = PrepList(1, 2, 10);
-            Round3Contestants.ItemsSource = PrepList(2, 3, 8);
-            for (int i = 1; i <= 3; i++)
+            UpdateCategory(chosenCategory);
+
+            foreach (var grid in new List<DataGrid>() { Round1Contestants, Round2Contestants, Round3Contestants })
+            foreach (var column in grid.Columns)
+            if (new Regex($@"^[AP][1-{Settings.RefNo}]$").IsMatch(column.Header.ToString()))
             {
-                var thisRoundGrid = Node<DataGrid>($"Round{i}Contestants");
-                for (int j = 1; j <= 9; j++)
-                {
-                    ((DataGridTextColumn)thisRoundGrid.FindName($"Round{i}Accuracy{j}")).Visibility = Visibility.Visible;
-                    ((DataGridTextColumn)thisRoundGrid.FindName($"Round{i}Presentation{j}")).Visibility = Visibility.Visible;
-                    if (j > RefNo)
-                    {
-                        ((DataGridTextColumn)thisRoundGrid.FindName($"Round{i}Accuracy{j}")).Visibility = Visibility.Hidden;
-                        ((DataGridTextColumn)thisRoundGrid.FindName($"Round{i}Presentation{j}")).Visibility = Visibility.Hidden;
-                    }
-                }
+                column.Visibility = Visibility.Visible;
             }
+
             Round1Contestants.Visibility = Visibility.Visible;
             Node<TabItem>($"TabRound{chosenCategory.CurrentRound}").Focus();
+        }
+
+        void UpdateCategory(Category cat)
+        {
+            Round1Contestants.ItemsSource = UpdateContestants(cat);
+            Round2Contestants.ItemsSource = PrepList(1, 2, 10);
+            Round3Contestants.ItemsSource = PrepList(2, 3, 8);
+
         }
 
         void RoundTabGotFocus(object sender, RoutedEventArgs e)
@@ -354,10 +373,10 @@ namespace TKD.App
 
         }
 
-        public IEnumerable<Performer> UpdateRound1(Category chosenCategory) =>
+        public IEnumerable<Performer> UpdateContestants(Category chosenCategory) =>
             from c in Contestants
                 join s in Scores on c equals s.Contestant into tmp
-            from filteredScore in tmp.DefaultIfEmpty(new Score(c.ID, chosenCategory.CurrentRound))
+            from filteredScore in tmp.DefaultIfEmpty(new Score(c, chosenCategory.CurrentRound))
                 where c.Active && c.Category == chosenCategory && filteredScore.Round == 1
                 select new Performer
                 {
@@ -369,7 +388,7 @@ namespace TKD.App
         {
             var chosenCategory = ChooseCategory.SelectedItem as Category;
             var performer = (e.Source as DataGrid).CurrentItem as Performer;
-            ActiveContestantWindow.Performer = performer;
+
             if (chosenCategory.CurrentRound == 3)
             {
                 var idx = (bool)new PoomsaeChoice().ShowDialog() ? 1 : 2;
@@ -377,11 +396,27 @@ namespace TKD.App
                     s.Contestant == performer.Contestant &&
                     s.Round      == chosenCategory.CurrentRound &&
                     s.Index      == idx
-                ) ?? new Score(performer.Contestant.ID, chosenCategory.CurrentRound);
+                ) ?? new Score(performer.Contestant, chosenCategory.CurrentRound);
+                performer.Score.Index = idx;
             }
+
+            if (performer.Score.SoloScores == null || performer.Score.SoloScores?.Count == 0)
+            foreach (var _ in Range(0, Referees.Count))
+            foreach (var type in new List<string> { "Accuracy", "Presentation" })
+                Context.SoloScores.Local.Add(new SoloScore
+                {
+                    Index = chosenCategory.CurrentRound,
+                    Score = performer.Score,
+                    Value = 0,
+                    Type = type
+                });
+
+            ActiveContestantController.Performer = performer;
+
             WSSV.WebSocketServices["/TKD"].Sessions.BroadcastAsync(OutboundPacket.Instructions("idle", idle: false), null);
             ActiveContestantWindow.Show();
-            ActiveContestantWindow.RefreshData();
+            ActiveContestantWindow.LoadContestant();
+            //ContestantPage.ScoresGrid.Visibility = Visibility.Hidden;
         }
 
         private void NoPoomsae(object sender, RoutedEventArgs e)
@@ -403,16 +438,14 @@ namespace TKD.App
                 .Take(quantity)
                 .Reverse()
                 .Select(p => {
-                    p.Score = Scores.FirstOrDefault(s =>
-                                    s.ContestantId == p.Contestant.ID && s.Round == nextRound)
-                              ?? new Score(p.Contestant.ID, nextRound);
+                    p.Score = Scores.FirstOrDefault(s => s.Contestant == p.Contestant && s.Round == nextRound)
+                              ?? new Score(p.Contestant, nextRound);
                     return p;
                 });
 
         private void ToNextRound(object sender, RoutedEventArgs e)
         {
             var curr = (ChooseCategory.SelectedItem as Category).CurrentRound;
-
             if (curr == 3)
             {
                 MessageBox.Show("No further rounds.");
@@ -434,9 +467,11 @@ namespace TKD.App
 
         private void ShowRankings(object sender, RoutedEventArgs e)
         {
-            var curr = int.Parse((string)((sender as MenuItem).Parent as ContextMenu).Tag);
-            var thisGrid = Node<DataGrid>($"Round{curr}Contestants");
-            var rankings = thisGrid.ItemsSource.Cast<Performer>()
+            var rankings = (((sender as MenuItem)
+                .Parent as ContextMenu)
+                .PlacementTarget as DataGrid)
+                .ItemsSource
+                .Cast<Performer>()
                 .OrderByDescending(p => p.Score.MinorMean)
                 .ThenByDescending(p => p.Score.GrandTotal)
                 .ThenByDescending(p => p.Score.MinorTotal)
@@ -444,40 +479,33 @@ namespace TKD.App
                 .ThenByDescending(p => p.Score.AccuracyGrandTotal)
                 .ThenByDescending(p => p.Score.PresentationMinorTotal)
                 .ThenByDescending(p => p.Score.PresentationGrandTotal)
-                .Select(p => p.Contestant.ToString() + "|" + p.Contestant.Team.Name)
+                .Select(p => (p.Contestant.FullName, p.Contestant.Team.Name))
                 .ToList();
-            for (int i = 0; i < rankings.Count; i++)
+            var miniView = new ListView();
+            var listView = new ListView();
+            foreach (var lv in new List<ListView>() { listView, miniView })
             {
-                var contAndTeam = rankings[i].Split('|');
-                rankings[i] = ((i+1) + ".").PadRight(4) + contAndTeam[0].PadRight(20) + contAndTeam[1];
-            }
-            var listView = new ListView
-            {
-                FontFamily = new FontFamily("Operator Mono SSM"),
-                BorderBrush = Brushes.PowderBlue,
-                BorderThickness = new Thickness(0),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Background = Brushes.PowderBlue
-            };
-            for (int i = 0; i < rankings.Count; i++)
-            {
-                var listViewItem = new ListViewItem
+                lv.FontFamily = new FontFamily("Operator Mono SSM");
+                lv.BorderBrush = Brushes.PowderBlue;
+                lv.BorderThickness = new Thickness(0);
+                lv.HorizontalAlignment = HorizontalAlignment.Center;
+                lv.VerticalAlignment = VerticalAlignment.Center;
+                lv.Background = Brushes.PowderBlue;
+                rankings.Select(ct => new ListViewItem
                 {
-                    Content = rankings[i],
+                    Content = (rankings.IndexOf(ct) + 1 + ".").PadRight(4) + ct.FullName.PadRight(20) + ct.Name,
                     HorizontalContentAlignment = HorizontalAlignment.Center
-                };
-                switch (i)
-                {
-                    case 0: listViewItem.Background = Brushes.Gold; listViewItem.FontSize += 6; break;
-                    case 1: listViewItem.Background = Brushes.Silver; listViewItem.FontSize += 4; break;
-                    case 2: listViewItem.Background = Brushes.DarkGoldenrod; listViewItem.FontSize += 2; break;
-                    default: break;
-                }
-                listView.Items.Add(listViewItem);
+                }).ToList().ForEach(lvi => lv.Items.Add(lvi));
+
+                (lv.Items[0] as ListViewItem).Background = Brushes.Gold; (lv.Items[0] as ListViewItem).FontSize += 6;
+                (lv.Items[1] as ListViewItem).Background = Brushes.Silver; (lv.Items[1] as ListViewItem).FontSize += 4;
+                (lv.Items[2] as ListViewItem).Background = Brushes.DarkGoldenrod; (lv.Items[2] as ListViewItem).FontSize += 2;
             }
             RankingsPage.RankingsViewBox.Child = listView;
-            DisplayScreen.DisplayScreenFrame.Content = RankingsPage;
+            Audience.DisplayScreenFrame.Content = RankingsPage;
+            var miniRankingsPage = new RankingsPage();
+            miniRankingsPage.RankingsViewBox.Child = miniView;
+            ActiveContestantWindow.MirrorWindow.Visual = miniRankingsPage;
         }
         private void OpenLog(object sender, RoutedEventArgs e) => LogWindow.Show();
 
@@ -488,7 +516,7 @@ namespace TKD.App
                 File.WriteAllText("properties.json", JsonConvert.SerializeObject(Settings, Formatting.Indented));
             });
             ActiveContestantWindow.Close();
-            DisplayScreen.Close();
+            Audience.Close();
             LogWindow.Close();
             Close();
             Application.Current.Shutdown();
@@ -514,24 +542,17 @@ namespace TKD.App
             //SetIp();
             WSSV = new WebSocketServer($"ws://{Settings.IP}:8088");
 
-            WSSV.AddWebSocketService("/TKD",
+            foreach (var name in new List<string>() { "/TKD", "/HeadRef" })
+            WSSV.AddWebSocketService(name,
                 () => new TKDClient
                 {
                     BaseWindow = this,
                     LogWindow = LogWindow,
                     ActiveContestantWindow = ActiveContestantWindow,
                     Devices = ConnectedDevices,
-                    Referees = Referees
-                }
-            );
-            WSSV.AddWebSocketService("/HeadRef",
-                () => new TKDClient
-                {
-                    BaseWindow = this,
-                    LogWindow = LogWindow,
-                    ActiveContestantWindow = ActiveContestantWindow,
-                    Devices = ConnectedDevices,
-                    Referees = Referees
+                    Referees = Referees,
+                    AppContext = Context,
+                    ActiveContestantController = ActiveContestantController
                 }
             );
             WSSV.Start();
@@ -544,14 +565,15 @@ namespace TKD.App
 
         private T Node<T>(string name, UIElement parent = null) => (T)(object)LogicalTreeHelper.FindLogicalNode(parent ?? MainTabControl, name);
 
-        private void HideDisplayScreen(object sender, RoutedEventArgs e)
+        private void ShowHideDisplayScreen(object sender, RoutedEventArgs e)
         {
-            if (DisplayScreen.Visibility == Visibility.Visible) DisplayScreen.Hide(); else DisplayScreen.Show();
+            if (Audience.Visibility == Visibility.Visible) Audience.Hide(); else Audience.Show();
         }
 
         private void ShowIdlePage(object sender, RoutedEventArgs e)
         {
-            DisplayScreen.DisplayScreenFrame.Content = IdlePage;
+            Audience.DisplayScreenFrame.Content = IdlePage;
+            ActiveContestantWindow.MirrorWindow.Visual = new IdlePage() { DataContext = Settings };
         }
 
         private void ApplyConfigChangesButton_Click(object sender, RoutedEventArgs e)
@@ -569,10 +591,12 @@ namespace TKD.App
                 Arguments = $"\"&'{path}'\" -IpAddress {Settings.IP}",
                 CreateNoWindow = true
             };
-            var proc = new Process { StartInfo = newProcessInfo };
-            proc.Start();
-            while (IP != Settings.IP) Thread.Sleep(100);
-            proc.WaitForExit();
+            using (var proc = new Process { StartInfo = newProcessInfo })
+            {
+                proc.Start();
+                while (IP != Settings.IP) Thread.Sleep(100);
+                proc.WaitForExit();
+            }
         }
     }
 }

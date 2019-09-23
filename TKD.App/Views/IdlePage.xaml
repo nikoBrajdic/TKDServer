@@ -13,11 +13,11 @@
         <Grid>
             <Label x:Name="ContestName" 
                    Foreground="#FF7C1414"
-                   Content="Contest Name"
+                   Content="{Binding Path=ContestName, FallbackValue=Contest Name}"
                    FontSize="5" />
             <Label x:Name="Date" 
                    Foreground="#FF000044"
-                   Content="Current Date"
+                   Content="{Binding Path=Date, FallbackValue=Current Date}"
                    HorizontalContentAlignment="Center"
                    FontSize="4"
                    Margin="0,6,0,0" />

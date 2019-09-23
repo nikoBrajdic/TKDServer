@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows.Controls;
 using TKD.App.Controllers;
+using TKD.App.Models;
 
 namespace TKD.App.Views
 {
@@ -21,10 +9,16 @@ namespace TKD.App.Views
     /// </summary>
     public partial class ContestantPage : Page
     {
+        public Performer Performer
+        {
+            get => (DataContext as ActiveContestantController).Performer;
+            set => (DataContext as ActiveContestantController).Performer = value;
+        }
+        public Score Score { get => Performer.Score; }
+
         public ContestantPage()
         {
             InitializeComponent();
-            DataContext = new DoubleTextConverter();
         }
     }
 }

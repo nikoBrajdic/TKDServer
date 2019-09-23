@@ -8,16 +8,44 @@
         Title="Active Contestant"
         Height="711.435"
         Width="1005.5"
-        Loaded="Window_Loaded"
         WindowStyle="SingleBorderWindow"
         Icon="../img/icon.png"
         BorderBrush="#FF3F3F46"
         Closing="NeverClose">
     <Window.Resources>
 
-        <local:DoubleTextConverter x:Key="doubleTextConvert" />
+        <local:ScoreConverter x:Key="scoreConverter" />
+        <BooleanToVisibilityConverter x:Key="ShowHideReferee" />
 
-        <ContextMenu x:Key="CogDialog">
+        <Style TargetType="Label">
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CogButtonStyle" 
+               TargetType="Button" >
+            <Setter Property="Grid.Column" Value="3" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="BorderBrush" Value="Gray" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <StackPanel Orientation="Horizontal" 
+                                    HorizontalAlignment="Center">
+                            <Image Width="23" Height="23">
+                                <Image.Source>
+                                    <BitmapImage UriSource="../img/cog.png" />
+                                </Image.Source>
+                            </Image>
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <ContextMenu x:Key="CogMenu">
             <MenuItem Header="Pull"
                       Click="Pull">
                 <MenuItem.Icon>
@@ -44,18 +72,29 @@
             </MenuItem>
         </ContextMenu>
 
-        <StackPanel x:Key="CogImage"
-                    Orientation="Horizontal">
-            <Image Width="23" />
-        </StackPanel>
+        <Style x:Key="SingleScoreStyle" TargetType="TextBox">
+            <Setter Property="Margin" Value="10,3" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="MaxLength" Value="3" />
+        </Style>
 
-        <BitmapImage x:Key="Cog"
-                     UriSource="../img/cog.png" />
+        <Style x:Key="AccuracyTextBox"
+               TargetType="TextBox"
+               BasedOn="{StaticResource SingleScoreStyle}">
+            <Setter Property="Grid.Column" Value="1" />
+        </Style>
+        
+        <Style x:Key="PresentationTextBox"
+               TargetType="TextBox"
+               BasedOn="{StaticResource SingleScoreStyle}">
+            <Setter Property="Grid.Column" Value="2" />
+        </Style>
+
     </Window.Resources>
     <Grid x:Name="MainGrid">
         <Label x:Name="ContestantName"
-               Content="Contestant's Name"
-               HorizontalContentAlignment="Center"
+               Content="{Binding Path=Performer.Contestant.FullName}"
                Height="45"
                VerticalAlignment="Top"
                FontSize="24" />
@@ -83,273 +122,278 @@
                 <RowDefinition />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <Label Content="Technique"
-                   Grid.Column="1"
-                   HorizontalContentAlignment="Center" />
+            <Label Content="Accuracy"
+                   Grid.Column="1" />
             <Label Content="Presentation"
-                   Grid.Column="2"
-                   HorizontalContentAlignment="Center" />
-            <Label Content="1"
-                   Grid.Row="1" />
-            <Label Content="2"
-                   Grid.Row="2" />
-            <Label Content="3"
-                   Grid.Row="3" />
-            <Label Content="4"
-                   Grid.Row="4" />
-            <Label Content="5"
-                   Grid.Row="5" />
-            <Label Content="6"
-                   Grid.Row="6" />
-            <Label Content="7"
-                   Grid.Row="7" />
-            <Label Content="8"
-                   Grid.Row="8" />
-            <Label Content="9"
-                   Grid.Row="9" />
-            <TextBox x:Name="LScore1"
-                     Grid.Column="1"
-                     Margin="10,3"
-                     Grid.Row="1"
-                     TextWrapping="Wrap"
-                     Text="{Binding Path=Score.Accuracy1, Converter={StaticResource doubleTextConvert}}"
-                     Tag="1"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="0" />
-            <TextBox x:Name="RScore1"
-                     Grid.Column="2"
-                     Margin="10,3"
-                     Grid.Row="1"
-                     TextWrapping="Wrap"
-                     Text="{Binding Path=Score.Presentation1, Converter={StaticResource doubleTextConvert}}"
-                     Tag="1"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="9" />
-            <Button Grid.Column="3"
-                    Grid.Row="1"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="4,3"
-                    Tag="1"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
-                <Image Source="{StaticResource Cog}" />
-            </Button>
-            <TextBox x:Name="LScore2"
-                     Grid.Column="1"
-                     Margin="10,3,10,3"
-                     Grid.Row="2"
-                     TextWrapping="Wrap"
-                     Text="T2"
-                     Tag="2"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="1" />
-            <TextBox x:Name="RScore2"
-                     Grid.Column="2"
-                     Margin="10,3,10,3"
-                     Grid.Row="2"
-                     TextWrapping="Wrap"
-                     Text="P2"
-                     Tag="2"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="10" />
-            <Button Grid.Column="3"
-                    Grid.Row="2"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="4,3"
-                    Tag="2"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
-                <Image Source="{StaticResource Cog}" />
-            </Button>
-            <TextBox x:Name="LScore3"
-                     Grid.Column="1"
-                     Margin="10,3,10,3"
-                     Grid.Row="3"
-                     TextWrapping="Wrap"
-                     Text="T3"
-                     Tag="3"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="2" />
-            <TextBox x:Name="RScore3"
-                     Grid.Column="2"
-                     Margin="10,3,10,3"
-                     Grid.Row="3"
-                     TextWrapping="Wrap"
-                     Text="P3"
-                     Tag="3"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="11" />
-            <Button Grid.Column="3"
-                    Grid.Row="3"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="4,3"
-                    Tag="3"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
-                <Image Source="{StaticResource Cog}" />
-            </Button>
-            <TextBox x:Name="LScore4"
-                     Grid.Column="1"
-                     Margin="10,3,10,3"
-                     Grid.Row="4"
-                     TextWrapping="Wrap"
-                     Text="T4"
-                     Tag="4"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="3" />
-            <TextBox x:Name="RScore4"
-                     Grid.Column="2"
-                     Margin="10,3,10,3"
-                     Grid.Row="4"
-                     TextWrapping="Wrap"
-                     Text="P4"
-                     Tag="4"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="12" />
-            <Button Grid.Column="3"
-                    Grid.Row="4"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="4,3"
-                    Tag="4"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
-                <Image Source="{StaticResource Cog}" />
-            </Button>
-            <TextBox x:Name="LScore5"
-                     Grid.Column="1"
-                     Margin="10,3,10,3"
-                     Grid.Row="5"
-                     TextWrapping="Wrap"
-                     Text="T5"
-                     Tag="5"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="4" />
-            <TextBox x:Name="RScore5"
-                     Grid.Column="2"
-                     Margin="10,3,10,3"
-                     Grid.Row="5"
-                     TextWrapping="Wrap"
-                     Text="P5"
-                     Tag="5"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="13" />
-            <Button Grid.Column="3"
-                    Grid.Row="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="4,3"
-                    Tag="5"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
-                <Image Source="{StaticResource Cog}" />
-            </Button>
-            <TextBox x:Name="LScore6"
-                     Grid.Column="1"
-                     Margin="10,3,10,3"
-                     Grid.Row="6"
-                     TextWrapping="Wrap"
-                     Text="T6"
-                     Tag="6"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="5" />
-            <TextBox x:Name="RScore6"
-                     Grid.Column="2"
-                     Margin="10,3,10,3"
-                     Grid.Row="6"
-                     TextWrapping="Wrap"
-                     Text="P6"
-                     Tag="6"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="14" />
-            <Button Grid.Column="3"
-                    Grid.Row="6"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="4,3"
-                    Tag="6"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
-                <Image Source="{StaticResource Cog}" />
-            </Button>
-            <TextBox x:Name="LScore7"
-                     Grid.Column="1"
-                     Margin="10,3,10,3"
-                     Grid.Row="7"
-                     TextWrapping="Wrap"
-                     Text="T7"
-                     Tag="7"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="6" />
-            <TextBox x:Name="RScore7"
-                     Grid.Column="2"
-                     Margin="10,3,10,3"
-                     Grid.Row="7"
-                     TextWrapping="Wrap"
-                     Text="P7"
-                     Tag="7"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="15" />
-            <Button Grid.Column="3"
-                    Grid.Row="7"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="4,3"
-                    Tag="7"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
-                <Image Source="{StaticResource Cog}" />
-            </Button>
-            <TextBox x:Name="LScore8"
-                     Grid.Column="1"
-                     Margin="10,3,10,3"
-                     Grid.Row="8"
-                     TextWrapping="Wrap"
-                     Text="T8"
-                     Tag="8"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="7" />
-            <TextBox x:Name="RScore8"
-                     Grid.Column="2"
-                     Margin="10,3,10,3"
-                     Grid.Row="8"
-                     TextWrapping="Wrap"
-                     Text="P8"
-                     Tag="8"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="16" />
-            <Button Grid.Column="3"
-                    Grid.Row="8"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="4,3"
-                    Tag="8"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
-                <Image Source="{StaticResource Cog}" />
-            </Button>
-            <TextBox x:Name="LScore9"
-                     Grid.Column="1"
-                     Margin="10,3,10,3"
-                     Grid.Row="9"
-                     TextWrapping="Wrap"
-                     Text="T9"
-                     Tag="9"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="8" />
-            <TextBox x:Name="RScore9"
-                     Grid.Column="2"
-                     Margin="10,3,10,3"
-                     Grid.Row="9"
-                     TextWrapping="Wrap"
-                     Text="P9"
-                     Tag="9"
-                     HorizontalContentAlignment="Center"
-                     KeyboardNavigation.TabIndex="17" />
-            <Button Grid.Column="3"
-                    Grid.Row="9"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Margin="4,3"
-                    Tag="9"
-                    ContextMenu="{Binding Source={StaticResource CogDialog}}">
-                <Image Source="{StaticResource Cog}" />
-            </Button>
+                   Grid.Column="2" />
+            <Grid Grid.Row="1"
+                  Grid.ColumnSpan="4"
+                  Visibility="{Binding Path=IsEnabled1, Converter={StaticResource ShowHideReferee}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="17*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+                
+                <Label Content="1"
+                       Grid.Row="1" />
+                <TextBox x:Name="LScore1"
+                         Style="{StaticResource AccuracyTextBox}"
+                         Text="{Binding Path=Score.Accuracy1, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="1"
+                         KeyboardNavigation.TabIndex="0"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <TextBox x:Name="RScore1"
+                         Style="{StaticResource PresentationTextBox}"
+                         Text="{Binding Path=Score.Presentation1, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="1"
+                         KeyboardNavigation.TabIndex="9"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <Button Tag="1"
+                        Style="{StaticResource CogButtonStyle}"
+                        ContextMenu="{StaticResource CogMenu}"/>
+            </Grid>
+            <Grid Grid.Row="2"
+                  Grid.ColumnSpan="4"
+                  Visibility="{Binding Path=IsEnabled2, Converter={StaticResource ShowHideReferee}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="17*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+                
+                <Label Content="2"
+                       Grid.Row="2" />
+                <TextBox x:Name="LScore2"
+                         Style="{StaticResource AccuracyTextBox}"
+                         Text="{Binding Path=Score.Accuracy2, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="2"
+                         KeyboardNavigation.TabIndex="1"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <TextBox x:Name="RScore2"
+                         Style="{StaticResource PresentationTextBox}"
+                         Text="{Binding Path=Score.Presentation2, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="2"
+                         KeyboardNavigation.TabIndex="10"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <Button Tag="2"
+                        Style="{StaticResource CogButtonStyle}"
+                        ContextMenu="{StaticResource CogMenu}" />
+            </Grid>
+            <Grid Grid.Row="3"
+                  Grid.ColumnSpan="4"
+                  Visibility="{Binding Path=IsEnabled3, Converter={StaticResource ShowHideReferee}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="17*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+                
+                <Label Content="3"
+                       Grid.Row="3" />
+                <TextBox x:Name="LScore3"
+                         Style="{StaticResource AccuracyTextBox}"
+                         Text="{Binding Path=Score.Accuracy3, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="3"
+                         KeyboardNavigation.TabIndex="2"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <TextBox x:Name="RScore3"
+                         Style="{StaticResource PresentationTextBox}"
+                         Text="{Binding Path=Score.Presentation3, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="3"
+                         KeyboardNavigation.TabIndex="11"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <Button Tag="3"
+                        Style="{StaticResource CogButtonStyle}"
+                        ContextMenu="{StaticResource CogMenu}" />
+            </Grid>
+            <Grid Grid.Row="4"
+                  Grid.ColumnSpan="4"
+                  Visibility="{Binding Path=IsEnabled4, Converter={StaticResource ShowHideReferee}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="17*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="4"
+                       Grid.Row="4" />
+                <TextBox x:Name="LScore4"
+                         Style="{StaticResource AccuracyTextBox}"
+                         Text="{Binding Path=Score.Accuracy4, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="4"
+                         KeyboardNavigation.TabIndex="3"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <TextBox x:Name="RScore4"
+                         Style="{StaticResource PresentationTextBox}"
+                         Text="{Binding Path=Score.Presentation4, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="4"
+                         KeyboardNavigation.TabIndex="12"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <Button Tag="4"
+                        Style="{StaticResource CogButtonStyle}"
+                        ContextMenu="{StaticResource CogMenu}" />
+            </Grid>
+            <Grid Grid.Row="5"
+                  Grid.ColumnSpan="4"
+                  Visibility="{Binding Path=IsEnabled5, Converter={StaticResource ShowHideReferee}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="17*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="5"
+                       Grid.Row="5" />
+                <TextBox x:Name="LScore5"
+                         Style="{StaticResource AccuracyTextBox}"
+                         Text="{Binding Path=Score.Accuracy5, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="5"
+                         KeyboardNavigation.TabIndex="4"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <TextBox x:Name="RScore5"
+                         Style="{StaticResource PresentationTextBox}"
+                         Text="{Binding Path=Score.Presentation5, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="5"
+                         KeyboardNavigation.TabIndex="13"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <Button Tag="5"
+                        Style="{StaticResource CogButtonStyle}"
+                        ContextMenu="{StaticResource CogMenu}" />
+            </Grid>
+            <Grid Grid.Row="6"
+                  Grid.ColumnSpan="4"
+                  Visibility="{Binding Path=IsEnabled6, Converter={StaticResource ShowHideReferee}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="17*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+                
+                <Label Content="6"
+                       Grid.Row="6" />
+                <TextBox x:Name="LScore6"
+                         Style="{StaticResource AccuracyTextBox}"
+                         Text="{Binding Path=Score.Accuracy6, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="6"
+                         KeyboardNavigation.TabIndex="5"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <TextBox x:Name="RScore6"
+                         Style="{StaticResource PresentationTextBox}"
+                         Text="{Binding Path=Score.Presentation6, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="6"
+                         KeyboardNavigation.TabIndex="14"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <Button Tag="6"
+                        Style="{StaticResource CogButtonStyle}"
+                        ContextMenu="{StaticResource CogMenu}" />
+            </Grid>
+            <Grid Grid.Row="7"
+                  Grid.ColumnSpan="4"
+                  Visibility="{Binding Path=IsEnabled7, Converter={StaticResource ShowHideReferee}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="17*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="7"
+                       Grid.Row="7" />
+                <TextBox x:Name="LScore7"
+                         Style="{StaticResource AccuracyTextBox}"
+                         Text="{Binding Path=Score.Accuracy7, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="7"
+                         KeyboardNavigation.TabIndex="6"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <TextBox x:Name="RScore7"
+                         Style="{StaticResource PresentationTextBox}"
+                         Text="{Binding Path=Score.Presentation7, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="7"
+                         KeyboardNavigation.TabIndex="15"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <Button Tag="7"
+                        Style="{StaticResource CogButtonStyle}"
+                        ContextMenu="{StaticResource CogMenu}" />
+            </Grid>
+            <Grid Grid.Row="8"
+                  Grid.ColumnSpan="4"
+                  Visibility="{Binding Path=IsEnabled8, Converter={StaticResource ShowHideReferee}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="17*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="8"
+                       Grid.Row="8" />
+                <TextBox x:Name="LScore8"
+                         Style="{StaticResource AccuracyTextBox}"
+                         Text="{Binding Path=Score.Accuracy8, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="8"
+                         KeyboardNavigation.TabIndex="7"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <TextBox x:Name="RScore8"
+                         Style="{StaticResource PresentationTextBox}"
+                         Text="{Binding Path=Score.Presentation8, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="8"
+                         KeyboardNavigation.TabIndex="16"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <Button Tag="8"
+                        Style="{StaticResource CogButtonStyle}"
+                        ContextMenu="{StaticResource CogMenu}" />
+            </Grid>
+            <Grid Grid.Row="9"
+                  Grid.ColumnSpan="4"
+                  Visibility="{Binding Path=IsEnabled9, Converter={StaticResource ShowHideReferee}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="17*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="110*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+                <Label Content="9" />
+                <TextBox x:Name="LScore9"
+                         Style="{StaticResource AccuracyTextBox}"
+                         Text="{Binding Path=Score.Accuracy9, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="9"
+                         KeyboardNavigation.TabIndex="8"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <TextBox x:Name="RScore9"
+                         Style="{StaticResource PresentationTextBox}"
+                         Text="{Binding Path=Score.Presentation9, Mode=TwoWay, Converter={StaticResource scoreConverter}}"
+                         Tag="9"
+                         KeyboardNavigation.TabIndex="17"
+                         TextChanged="TextBoxTextChanged"
+                         PreviewKeyDown="TextBoxKeyPress" />
+                <Button Grid.Column="3" Tag="9"
+                        Style="{StaticResource CogButtonStyle}"
+                        ContextMenu="{StaticResource CogMenu}" />
+            </Grid>
         </Grid>
         <Grid x:Name="FinalsGrid"
               Margin="10,0,0,16"
@@ -371,68 +415,54 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <TextBox x:Name="GrandTotalResult"
-                     Text="{Binding Path=GrandTotal}"
+                     Text="{Binding Path=Score.DisGrandTotal, Converter={StaticResource scoreConverter}}"
                      Grid.Column="1"
                      Grid.Row="0"
                      Margin="10,3" />
             <TextBox x:Name="MeanResult"
-                     Text="{Binding Path=GrandTotal}"
+                     Text="{Binding Path=Score.DisMinorMean, Converter={StaticResource scoreConverter}}"
                      Grid.Column="1"
                      Grid.Row="1"
                      Margin="10,3" />
             <TextBox x:Name="MinorResult"
-                     Text="{Binding Path=GrandTotal}"
+                     Text="{Binding Path=Score.DisMinorTotal, Converter={StaticResource scoreConverter}}"
                      Grid.Column="1"
                      Grid.Row="2"
                      Margin="10,3" />
             <TextBox x:Name="AMinorResult"
-                     Text="{Binding Path=GrandTotal}"
+                     Text="{Binding Path=Score.DisAccuracyMinorTotal, Converter={StaticResource scoreConverter}}"
                      Grid.Column="1"
                      Grid.Row="3"
                      Margin="10,3" />
             <TextBox x:Name="ATotalResult"
-                     Text="{Binding Path=GrandTotal}"
+                     Text="{Binding Path=Score.DisAccuracyGrandTotal, Converter={StaticResource scoreConverter}}"
                      Grid.Column="1"
                      Grid.Row="4"
                      Margin="10,3" />
             <TextBox x:Name="PMinorResult"
-                     Text="{Binding Path=GrandTotal}"
+                     Text="{Binding Path=Score.DisPresentationMinorTotal, Converter={StaticResource scoreConverter}}"
                      Grid.Column="1"
                      Grid.Row="5"
                      Margin="10,3" />
             <TextBox x:Name="PTotalResult"
-                     Text="{Binding Path=GrandTotal}"
+                     Text="{Binding Path=Score.DisPresentationGrandTotal, Converter={StaticResource scoreConverter}}"
                      Grid.Column="1"
                      Grid.Row="6"
                      Margin="10,3" />
             <Label Content="Grand Total:"
-                   Grid.Row="0"
-                   HorizontalContentAlignment="Center"
-                   VerticalContentAlignment="Center" />
+                   Grid.Row="0" />
             <Label Content="Mean:"
-                   Grid.Row="1"
-                   HorizontalContentAlignment="Center"
-                   VerticalContentAlignment="Center" />
+                   Grid.Row="1" />
             <Label Content="Minor:"
-                   Grid.Row="2"
-                   HorizontalContentAlignment="Center"
-                   VerticalContentAlignment="Center" />
-            <Label Content="Presentation Minor:"
-                   Grid.Row="3"
-                   HorizontalContentAlignment="Center"
-                   VerticalContentAlignment="Center" />
-            <Label Content="Presentation Total:"
-                   Grid.Row="4"
-                   HorizontalContentAlignment="Center"
-                   VerticalContentAlignment="Center" />
+                   Grid.Row="2" />
             <Label Content="Accuracy Minor:"
-                   Grid.Row="5"
-                   HorizontalContentAlignment="Center"
-                   VerticalContentAlignment="Center" />
+                   Grid.Row="3" />
             <Label Content="Accuracy Total:"
-                   Grid.Row="6"
-                   HorizontalContentAlignment="Center"
-                   VerticalContentAlignment="Center" />
+                   Grid.Row="4" />
+            <Label Content="Presentation Minor:"
+                   Grid.Row="5" />
+            <Label Content="Presentation Total:"
+                   Grid.Row="6" />
         </Grid>
         <Grid HorizontalAlignment="Stretch"
               VerticalAlignment="Bottom"
@@ -468,8 +498,8 @@
         <Rectangle Margin="307,45,21,82"
                    Stroke="Black">
             <Rectangle.Fill>
-                <VisualBrush Stretch="Uniform"
-                             Visual="{Binding}" />
+                <VisualBrush x:Name="MirrorWindow"
+                             Stretch="Uniform" />
             </Rectangle.Fill>
         </Rectangle>
     </Grid>
