@@ -71,7 +71,14 @@ namespace TKD.App.Models
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return MainWindow.Context.Poomsaes.Local.FirstOrDefault(p => p.Name == value as string);
+            try
+            {
+                return MainWindow.Context.Poomsaes.Local.FirstOrDefault(p => p.Name == value as string);
+            }
+            catch
+            {
+                return "";
+            }
         }
 
         public string Poomsae11 { get => GetPoomsae(1, 1).Poomsae.ToString(); set => SetPoomsae(1, 1, value); }

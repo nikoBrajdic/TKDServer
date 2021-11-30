@@ -13,6 +13,8 @@ using TKD.App.Models;
 using TKD.App.Views;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+using System.Text.RegularExpressions;
+using ExtensionsNamespace;
 
 namespace TKD.App
 {
@@ -41,10 +43,10 @@ namespace TKD.App
                 switch (packet.Type)
                 {
                     case "connect_request":
-                        Write("New Device wants to connect...");
+                        Info("New Device wants to connect...");
                         if (Referees.Count == 0)
                         {
-                            Write("Can't connect, no available referees. Release any disabled referee!");
+                            Info("Can't connect, no available referees. Release any disabled referee!");
                             // stop connecting till I tell you to start!
                             ws.Send(OutboundPacket.Instructions("disconnect", dc: true, message: "no more available referees!"));
                             ws.Close();
@@ -61,18 +63,18 @@ namespace TKD.App
                                 Enabled = true
                             };
                             Devices.Add(Device);
-                            Write($"New device has connected. Sending referee ID {Device.Id}");
+                            Info($"New device has connected. Sending referee ID {Device.Id}");
                         }
                         else if (Device.Id == packet.Id)
                         {
                             Device.Handle = ws;
-                            Write($"Reconnected device, found by ID. Handing it back referee #{Device.Id}");
+                            Info($"Reconnected device, found by ID. Handing it back referee #{Device.Id}");
                         }
                         else
                         {
                             Device.Mac = packet.Mac;
                             Device.Handle = ws;
-                            Write($"Reconnected device, found by MAC. Handing it back referee #{Device.Id}");
+                            Info($"Reconnected device, found by MAC. Handing it back referee #{Device.Id}");
                         }
                         Device.Enabled = true;
                         var x = FindDevice(ws);
@@ -82,88 +84,87 @@ namespace TKD.App
 
 
                     case "hello":
-                        Write($"Device {Device.Id} confirms referee ID");
+                        Info($"Device {Device.Id} confirms referee ID");
                         ws.Send(OutboundPacket.Instructions("idle", idle: true, message: $"Successfully connected as referee #{Device.Id}"));
                         break;
 
 
                     case "battery":
-                        Write($"Device {Device.Id} battery: {packet.Battery.ToString()}%.");
+                        Info($"Device {Device.Id} battery: {packet.Battery.ToString()}%.");
                         break;
 
 
                     case "confirm":
                         DoInMainThread(() => {
-                            new List<string>() { "LScore", "RScore" }.ForEach(score => {
-                                Node<TextBox>($"{score}{Device.Id}", ActiveContestantWindow).BorderBrush = Brushes.Green;
-                                Node<TextBox>($"{score}{Device.Id}", ActiveContestantWindow).BorderThickness = new Thickness(3);
-                            });
+                            (ActiveContestantWindow
+                                .ScoresGrid
+                                .Children[Device.Id - 1] as Grid)
+                                .Children
+                                .Map((c, i) => i == 1 || i == 2, c => c as TextBox)
+                                .Apply(tb => {
+                                    tb.BorderBrush = Brushes.Green;
+                                    tb.BorderThickness = new Thickness(3);
+                                });
+                            //new List<string>() { "LScore", "RScore" }.ForEach(s => {
+                            //    Node<TextBox>($"{s}{Device.Id}", ActiveContestantWindow).BorderBrush = Brushes.Green;
+                            //    Node<TextBox>($"{s}{Device.Id}", ActiveContestantWindow).BorderThickness = new Thickness(3);
+                            //});
                         });
                         goto case "score";
 
                     case "score":
-#if MVVM
-                        DoInMainThread(() =>
-                        {
-                            var score = AppContext.Scores.Local.First(s => s.Contestant == ActiveContestantWindow.Contestant);
-                            score.SoloScores.First(ss =>
-                                ss.Index == Device.Id &&
-                                ss.Type == "Accuracy"
-                            ).Value = packet.Scores.Accuracy / 10f;
-                            score.SoloScores.First(ss =>
-                                ss.Index == Device.Id &&
-                                ss.Type == "Presentation"
-                            ).Value = packet.Scores.Presentation / 10f;
-                        });
-                        ActiveContestantController.RaisePropertyChanged("Score");
-                        break;
-#else
-                        var lval = packet.Astr();
-                        var rval = packet.Pstr();
-                        Write($"Device {Device.Id} score: {lval} | {rval}.");
+                        
+                        Info($"Device {Device.Id} score: {packet.Scores.Accuracy / 10f} | {packet.Scores.Presentation / 10f}.");
                         DoInMainThread(() => {
-                            Node<TextBox>($"LScore{Device.Id}", ActiveContestantWindow).Text = lval;
-                            Node<TextBox>($"RScore{Device.Id}", ActiveContestantWindow).Text = rval;
-                            typeof(Score).GetProperty($"Accuracy{Device.Id}").SetValue(ActiveContestantWindow.Score, double.Parse(lval));
-                            typeof(Score).GetProperty($"Presentation{Device.Id}").SetValue(ActiveContestantWindow.Score, double.Parse(rval));
+                            var soloScores = AppContext.Scores.Local.First(s => s.Contestant == ActiveContestantWindow.Contestant)
+                                                                    .SoloScores.Where(ss => ss.Index == Device.Id);
+                            soloScores.First(ss => ss.Type == "Accuracy").Value = packet.Scores.Accuracy / 10f;
+                            soloScores.First(ss => ss.Type == "Presentation").Value = packet.Scores.Presentation / 10f;
+                            ActiveContestantController.RaisePropertyChanged("Score");
                         });
                         break;
-#endif
 
                     default:
-                        Write($"Device {Device.Id} says: {packet.Type}.");
+                        Info($"Device {Device.Id} says: {packet.Type}.");
                         break;
                 }
             }
             catch (JsonReaderException ex)
             {
-                Console.WriteLine(ex.StackTrace);
-                DoInMainThread(() =>
-                    Write($"Device {Device.Id} says: {e.Data}."));
+                Info(ex.StackTrace);
+                Info($"Device {Device.Id} says: {e.Data}.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.StackTrace);
+                Info(ex.StackTrace);
             }
         }
 
 
         protected override void OnClose(CloseEventArgs e)
         {
+            const int NORMAL_CLOSURE_STATUS = 1000;
+            
+            Info(e.Reason);
+            int id = int.Parse(new Regex(@"\d").Match(e.Reason).Value);
+            if (e.Code != NORMAL_CLOSURE_STATUS)
+            {
+                Devices.RemoveAt(id);
+                Referees.Enqueue(id);
+                Info($"Referee {id} released");
+                base.OnClose(e);
+                return;
+            }
+            FindDevice(id).Enabled = false;
             base.OnClose(e);
-            var Device = FindDevice(Context.WebSocket);
-            DoInMainThread(() => {
-                Write($"Device {Device.Id} disconnected.");
-                Device.Enabled = false;
-            });
         }
 
 
         private void DoInMainThread(Action action) => Application.Current.Dispatcher.Invoke(action);
-        private void Write(string text)
+        private void Info(string text)
         {
             DoInMainThread(() => {
-                LogWindow.LogBox.Text += text + Environment.NewLine;
+                LogWindow.LogBox.Text += $"[{DateTime.Now.ToString(@"HH:mm:ss:ffff")}] INFO {text}{Environment.NewLine}";
                 LogWindow.LogBox.ScrollToEnd();
             });
         }
@@ -184,7 +185,5 @@ namespace TKD.App
                     return null;
             }
         }
-        private T Node<T>(string name, UIElement parent = null) => (T)(object)LogicalTreeHelper.FindLogicalNode(parent, name);
-
     }
 }

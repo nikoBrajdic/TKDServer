@@ -10,12 +10,12 @@ namespace TKD.App.Models
 {
     public class Settings
     {
-        [JsonProperty("refereeCount")]
-        public int RefNo { get; set; }
         [JsonProperty("ip")]
         public string IP { get; set; }
         [JsonProperty("contestName")]
         public string ContestName { get; set; }
+        [JsonProperty("refereeCount")]
+        public int RefNo { get; set; }
         [JsonIgnore]
         public string Date { get => DateTime.Today.ToString("dd. MMMM yyyy.", CultureInfo.InvariantCulture); }
     }

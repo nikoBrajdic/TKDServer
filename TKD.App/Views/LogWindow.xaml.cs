@@ -12,7 +12,7 @@ namespace TKD.App.Views
         private void ClearText(object sender, RoutedEventArgs e) => LogBox.Text = "";
         public void Log(string text)
         {
-            LogBox.Text += text;
+            LogBox.Text += text + "\n";
             LogBox.ScrollToEnd();
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) => Hide();

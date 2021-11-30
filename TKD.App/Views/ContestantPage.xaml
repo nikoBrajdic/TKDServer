@@ -72,8 +72,7 @@
                    FontWeight="Bold"
                    Margin="250,0,250,210">
             </Label>
-            <Grid x:Name="ScoresGrid"
-                  HorizontalAlignment="Stretch"
+            <Grid HorizontalAlignment="Stretch"
                   VerticalAlignment="Bottom"
                   Height="200"
                   Margin="0,0,0,21"
@@ -97,6 +96,192 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
+                <Grid x:Name="ScoresGrid"
+                      Grid.RowSpan="3"
+                      Grid.Column="1"
+                      Grid.ColumnSpan="9">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition MaxWidth="{Binding IsEnabled1, Converter={StaticResource ShowHideColumn}}"
+                                          Width="1*" />
+                        <ColumnDefinition MaxWidth="{Binding IsEnabled2, Converter={StaticResource ShowHideColumn}}"
+                                          Width="1*" />
+                        <ColumnDefinition MaxWidth="{Binding IsEnabled3, Converter={StaticResource ShowHideColumn}}"
+                                          Width="1*" />
+                        <ColumnDefinition MaxWidth="{Binding IsEnabled4, Converter={StaticResource ShowHideColumn}}"
+                                          Width="1*" />
+                        <ColumnDefinition MaxWidth="{Binding IsEnabled5, Converter={StaticResource ShowHideColumn}}"
+                                          Width="1*" />
+                        <ColumnDefinition MaxWidth="{Binding IsEnabled6, Converter={StaticResource ShowHideColumn}}"
+                                          Width="1*" />
+                        <ColumnDefinition MaxWidth="{Binding IsEnabled7, Converter={StaticResource ShowHideColumn}}"
+                                          Width="1*" />
+                        <ColumnDefinition MaxWidth="{Binding IsEnabled8, Converter={StaticResource ShowHideColumn}}"
+                                          Width="1*" />
+                        <ColumnDefinition MaxWidth="{Binding IsEnabled9, Converter={StaticResource ShowHideColumn}}"
+                                          Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0"
+                          Grid.RowSpan="3"
+                          Visibility="{Binding IsEnabled1, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="2*" />
+                        </Grid.RowDefinitions>
+                        <Label Content="1"
+                               FontSize="25" />
+                        <TextBox x:Name="L1"
+                                 Grid.Row="1"
+                                 Text="{Binding Path=Score.Accuracy1, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                        <TextBox x:Name="R1"
+                                 Grid.Row="2"
+                                 Text="{Binding Path=Score.Presentation1, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                    </Grid>
+
+                    <Grid Grid.Column="1"
+                          Grid.RowSpan="3"
+                          Visibility="{Binding IsEnabled2, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="2*" />
+                        </Grid.RowDefinitions>
+                        <Label Content="2"
+                               FontSize="25" />
+                        <TextBox x:Name="L2"
+                                 Grid.Row="1"
+                                 Text="{Binding Path=Score.Accuracy2, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                        <TextBox x:Name="R2"
+                                 Grid.Row="2"
+                                 Text="{Binding Path=Score.Presentation2, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                    </Grid>
+
+                    <Grid Grid.Column="2"
+                          Grid.RowSpan="3"
+                          Visibility="{Binding IsEnabled3, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="2*" />
+                        </Grid.RowDefinitions>
+                        <Label Content="3"
+                               FontSize="25" />
+                        <TextBox x:Name="L3"
+                                 Grid.Row="1"
+                                 Text="{Binding Path=Score.Accuracy3, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                        <TextBox x:Name="R3"
+                                 Grid.Row="2"
+                                 Text="{Binding Path=Score.Presentation3, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                    </Grid>
+
+                    <Grid Grid.Column="3"
+                          Grid.RowSpan="3"
+                          Visibility="{Binding IsEnabled4, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="2*" />
+                        </Grid.RowDefinitions>
+                        <Label Content="4"
+                               FontSize="25" />
+                        <TextBox x:Name="L4"
+                                 Grid.Row="1"
+                                 Text="{Binding Path=Score.Accuracy4, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                        <TextBox x:Name="R4"
+                                 Grid.Row="2"
+                                 Text="{Binding Path=Score.Presentation4, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                    </Grid>
+
+                    <Grid Grid.Column="4"
+                          Grid.RowSpan="3"
+                          Visibility="{Binding IsEnabled5, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="2*" />
+                        </Grid.RowDefinitions>
+                        <Label Content="5"
+                               FontSize="25" />
+                        <TextBox x:Name="L5"
+                                 Grid.Row="1"
+                                 Text="{Binding Path=Score.Accuracy5, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                        <TextBox x:Name="R5"
+                                 Grid.Row="2"
+                                 Text="{Binding Path=Score.Presentation5, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                    </Grid>
+
+                    <Grid Grid.Column="5"
+                          Grid.RowSpan="3"
+                          Visibility="{Binding IsEnabled6, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="2*" />
+                        </Grid.RowDefinitions>
+                        <Label Content="6"
+                               FontSize="25" />
+                        <TextBox x:Name="L6"
+                                 Grid.Row="1"
+                                 Text="{Binding Path=Score.Accuracy6, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                        <TextBox x:Name="R6"
+                                 Grid.Row="2"
+                                 Text="{Binding Path=Score.Presentation6, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                    </Grid>
+
+                    <Grid Grid.Column="6"
+                          Grid.RowSpan="3"
+                          Visibility="{Binding IsEnabled7, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="2*" />
+                        </Grid.RowDefinitions>
+                        <Label Content="7"
+                               FontSize="25" />
+                        <TextBox x:Name="L7"
+                                 Grid.Row="1"
+                                 Text="{Binding Path=Score.Accuracy7, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                        <TextBox x:Name="R7"
+                                 Grid.Row="2"
+                                 Text="{Binding Path=Score.Presentation7, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                    </Grid>
+
+                    <Grid Grid.Column="7"
+                          Grid.RowSpan="3"
+                          Visibility="{Binding IsEnabled8, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="2*" />
+                        </Grid.RowDefinitions>
+                        <Label Content="8"
+                               FontSize="25" />
+                        <TextBox x:Name="L8"
+                                 Grid.Row="1"
+                                 Text="{Binding Path=Score.Accuracy8, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                        <TextBox x:Name="R8"
+                                 Grid.Row="2"
+                                 Text="{Binding Path=Score.Presentation8, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                    </Grid>
+
+                    <Grid Grid.Column="8"
+                          Grid.RowSpan="3"
+                          Visibility="{Binding IsEnabled9, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="2*" />
+                        </Grid.RowDefinitions>
+                        <Label Content="9"
+                               FontSize="25" />
+                        <TextBox x:Name="L9"
+                                 Grid.Row="1"
+                                 Text="{Binding Path=Score.Accuracy9, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                        <TextBox x:Name="R9"
+                                 Grid.Row="2"
+                                 Text="{Binding Path=Score.Presentation9, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
+                    </Grid>
+                </Grid>
                 <Label Content="A"
                        Grid.Row="1"
                        Style="{StaticResource APLabel}"/>
@@ -104,168 +289,6 @@
                        Grid.Row="2"
                        Style="{StaticResource APLabel}" />
 
-                <Grid Grid.Column="1"
-                      Grid.RowSpan="3"
-                      Visibility="{Binding IsEnabled1, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
-                        <RowDefinition Height="2*" />
-                        <RowDefinition Height="2*" />
-                    </Grid.RowDefinitions>
-                    <Label Content="1"
-                           FontSize="25" />
-                    <TextBox x:Name="L1"
-                             Grid.Row="1"
-                             Text="{Binding Path=Score.Accuracy1, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                    <TextBox x:Name="R1"
-                             Grid.Row="2"
-                             Text="{Binding Path=Score.Presentation1, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                </Grid>
-
-                <Grid Grid.Column="2"
-                      Grid.RowSpan="3"
-                      Visibility="{Binding IsEnabled2, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
-                        <RowDefinition Height="2*" />
-                        <RowDefinition Height="2*" />
-                    </Grid.RowDefinitions>
-                    <Label Content="2"
-                           FontSize="25" />
-                    <TextBox x:Name="L2"
-                             Grid.Row="1"
-                             Text="{Binding Path=Score.Accuracy2, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                    <TextBox x:Name="R2"
-                             Grid.Row="2"
-                             Text="{Binding Path=Score.Presentation2, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                </Grid>
-
-                <Grid Grid.Column="3"
-                      Grid.RowSpan="3"
-                      Visibility="{Binding IsEnabled3, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
-                        <RowDefinition Height="2*" />
-                        <RowDefinition Height="2*" />
-                    </Grid.RowDefinitions>
-                    <Label Content="3"
-                           FontSize="25" />
-                    <TextBox x:Name="L3"
-                             Grid.Row="1"
-                             Text="{Binding Path=Score.Accuracy3, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                    <TextBox x:Name="R3"
-                             Grid.Row="2"
-                             Text="{Binding Path=Score.Presentation3, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                </Grid>
-
-                <Grid Grid.Column="4"
-                      Grid.RowSpan="3"
-                      Visibility="{Binding IsEnabled4, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
-                        <RowDefinition Height="2*" />
-                        <RowDefinition Height="2*" />
-                    </Grid.RowDefinitions>
-                    <Label Content="4"
-                           FontSize="25" />
-                    <TextBox x:Name="L4"
-                             Grid.Row="1"
-                             Text="{Binding Path=Score.Accuracy4, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                    <TextBox x:Name="R4"
-                             Grid.Row="2"
-                             Text="{Binding Path=Score.Presentation4, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                </Grid>
-
-
-                <Grid Grid.Column="5"
-                      Grid.RowSpan="3"
-                      Visibility="{Binding IsEnabled5, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
-                        <RowDefinition Height="2*" />
-                        <RowDefinition Height="2*" />
-                    </Grid.RowDefinitions>
-                    <Label Content="5"
-                           FontSize="25" />
-                    <TextBox x:Name="L5"
-                             Grid.Row="1"
-                             Text="{Binding Path=Score.Accuracy5, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                    <TextBox x:Name="R5"
-                             Grid.Row="2"
-                             Text="{Binding Path=Score.Presentation5, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                </Grid>
-                
-                <Grid Grid.Column="6"
-                      Grid.RowSpan="3"
-                      Visibility="{Binding IsEnabled6, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
-                        <RowDefinition Height="2*" />
-                        <RowDefinition Height="2*" />
-                    </Grid.RowDefinitions>
-                    <Label Content="6"
-                           FontSize="25" />
-                    <TextBox x:Name="L6"
-                             Grid.Row="1"
-                             Text="{Binding Path=Score.Accuracy6, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                    <TextBox x:Name="R6"
-                             Grid.Row="2"
-                             Text="{Binding Path=Score.Presentation6, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                </Grid>
-                    
-                <Grid Grid.Column="7"
-                      Grid.RowSpan="3"
-                      Visibility="{Binding IsEnabled7, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
-                        <RowDefinition Height="2*" />
-                        <RowDefinition Height="2*" />
-                    </Grid.RowDefinitions>
-                    <Label Content="7"
-                           FontSize="25" />
-                    <TextBox x:Name="L7"
-                             Grid.Row="1"
-                             Text="{Binding Path=Score.Accuracy7, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                    <TextBox x:Name="R7"
-                             Grid.Row="2"
-                             Text="{Binding Path=Score.Presentation7, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                 </Grid>
-                        
-                <Grid Grid.Column="8"
-                      Grid.RowSpan="3"
-                      Visibility="{Binding IsEnabled8, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
-                        <RowDefinition Height="2*" />
-                        <RowDefinition Height="2*" />
-                    </Grid.RowDefinitions>
-                    <Label Content="8"
-                           FontSize="25" />
-                    <TextBox x:Name="L8"
-                             Grid.Row="1"
-                             Text="{Binding Path=Score.Accuracy8, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                    <TextBox x:Name="R8"
-                             Grid.Row="2"
-                             Text="{Binding Path=Score.Presentation8, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                </Grid>
-                            
-                <Grid Grid.Column="9"
-                      Grid.RowSpan="3"
-                      Visibility="{Binding IsEnabled9, Mode=OneWay, Converter={StaticResource ShowHideReferee}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
-                        <RowDefinition Height="2*" />
-                        <RowDefinition Height="2*" />
-                    </Grid.RowDefinitions>
-                    <Label Content="9"
-                           FontSize="25" />
-                    <TextBox x:Name="L9"
-                             Grid.Row="1"
-                             Text="{Binding Path=Score.Accuracy9, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                    <TextBox x:Name="R9"
-                             Grid.Row="2"
-                             Text="{Binding Path=Score.Presentation9, Mode=OneWay, Converter={StaticResource scoreConverter}}" />
-                </Grid>
                 <Label Content="A"
                        Grid.Column="10"
                        Grid.Row="1"

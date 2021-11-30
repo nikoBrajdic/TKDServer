@@ -24,6 +24,7 @@ using WebSocketSharp.Server;
 using FontFamily = System.Windows.Media.FontFamily;
 using static System.Linq.Enumerable;
 using System.Text.RegularExpressions;
+using ExtensionsNamespace;
 
 namespace TKD.App
 {
@@ -46,7 +47,7 @@ namespace TKD.App
         public ObservableCollection<Score> Scores { get => Context.Scores.Local; }
         public ObservableCollection<Team> Teams { get => Context.Teams.Local; }
         public ObservableCollection<Device> ConnectedDevices { get; } = new ObservableCollection<Device>();
-        public static TkdModel Context { get; } = new TkdModel();
+        public static TkdModel Context { get; private set; }
         public static ActiveContestantController ActiveContestantController { get; } = new ActiveContestantController();
         public static ActiveContestant ActiveContestantWindow { get; } = new ActiveContestant();
         public static Audience Audience { get; } = new Audience();
@@ -78,6 +79,7 @@ namespace TKD.App
             TeamViewSource        = (CollectionViewSource) FindResource("teamViewSource");
 
             Settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText("properties.json"));
+            Context = new TkdModel();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -141,31 +143,16 @@ namespace TKD.App
         private void NewEntry<T>()
         {
             var type = typeof(T).Name;
-            object @new;
-            switch (type)
+            object @new = type switch
             {
-                case "Category":
-                    @new = new Category { Name = "", ShortName = "" };
-                    break;
-                case "Contestant":
-                    @new = new Contestant { Name = "", Surname = "" };
-                    break;
-                case "Poomsae":
-                    @new = new Poomsae { Name = "", ShortName = "", Ordinal = "" };
-                    break;
-                case "PoomsaeType":
-                    @new = new PoomsaeType { Name = "" };
-                    break;
-                case "Score":
-                    @new = new Score();
-                    break;
-                case "Team":
-                    @new = new Team { Name = "" };
-                    break;
-                default:
-                    @new = null;
-                    break;
-            }
+                "Category"    => new Category { Name = "", ShortName = "" },
+                "Contestant"  => new Contestant { Name = "", Surname = "" },
+                "Poomsae"     => new Poomsae { Name = "", ShortName = "", Ordinal = "" },
+                "PoomsaeType" => new PoomsaeType { Name = "" },
+                "Score"       => new Score(),
+                "Team"        => new Team { Name = "" },
+                _             => null
+            };
             Context.Set(typeof(T)).Local.Add((T) @new);
             var viewSource = typeof(MainWindow).GetField($"{type}ViewSource").GetValue(this) as CollectionViewSource;
             viewSource.View.Refresh();
@@ -175,8 +162,8 @@ namespace TKD.App
 
             ((DataGrid)LogicalTreeHelper.FindLogicalNode(MainTabControl, $"{type}DataGrid")).ScrollIntoView(@new);
 
-            Dispatcher.BeginInvoke(new Action(() => 
-                    ((TextBox)LogicalTreeHelper.FindLogicalNode(MainTabControl, $"{type}NameTextBox")).Focus()), 
+            Dispatcher.BeginInvoke(new Action(() =>
+                    ((TextBox)LogicalTreeHelper.FindLogicalNode(MainTabControl, $"{type}NameTextBox")).Focus()),
                 DispatcherPriority.Input);
 
             PrepButtons(true, false, false, false, true, false, true, type);
@@ -241,7 +228,7 @@ namespace TKD.App
                 MessageBox.Show(x.Message);
             }
         }
-        
+
         // ------------------------------ EDIT -----------------------------------
         private void EditCategory_Click(object sender, RoutedEventArgs e) => EditEntry<Category>();
         private void EditContestant_Click(object sender, RoutedEventArgs e) => EditEntry<Contestant>();
@@ -392,7 +379,7 @@ namespace TKD.App
             if (chosenCategory.CurrentRound == 3)
             {
                 var idx = (bool)new PoomsaeChoice().ShowDialog() ? 1 : 2;
-                performer.Score = Scores.FirstOrDefault(s => 
+                performer.Score = Scores.FirstOrDefault(s =>
                     s.Contestant == performer.Contestant &&
                     s.Round      == chosenCategory.CurrentRound &&
                     s.Index      == idx
@@ -413,7 +400,7 @@ namespace TKD.App
 
             ActiveContestantController.Performer = performer;
 
-            WSSV.WebSocketServices["/TKD"].Sessions.BroadcastAsync(OutboundPacket.Instructions("idle", idle: false), null);
+            //WSSV.WebSocketServices["/TKD"].Sessions.BroadcastAsync(OutboundPacket.Instructions("idle", idle: false), null);
             ActiveContestantWindow.Show();
             ActiveContestantWindow.LoadContestant();
             //ContestantPage.ScoresGrid.Visibility = Visibility.Hidden;
@@ -422,7 +409,8 @@ namespace TKD.App
         private void NoPoomsae(object sender, RoutedEventArgs e)
         {
             var cbx = ((Button)sender).Tag as string;
-            Node<ComboBox>(cbx).SelectedItem = null;
+            CategoryEditGrid.Children.Apply(c => c is ComboBox && (c as ComboBox).Name == cbx, c => (c as ComboBox).SelectedItem = null);
+            //Node<ComboBox>(cbx).SelectedItem = null;
         }
 
         public IEnumerable<Performer> PrepList(int currRound, int nextRound, int quantity) =>
@@ -451,7 +439,8 @@ namespace TKD.App
                 MessageBox.Show("No further rounds.");
                 return;
             }
-            Node<TabItem>($"Round{curr + 1}").Focus();
+            MainTabControl.Items.Apply(ti => (ti as TabItem).Name == $"Round{curr + 1}", ti => (ti as TabItem).Focus());
+            //Node<TabItem>($"Round{curr + 1}").Focus();
         }
 
         private void ToPreviousRound(object sender, RoutedEventArgs e)
@@ -462,7 +451,8 @@ namespace TKD.App
                 MessageBox.Show("This is the first round.");
                 return;
             }
-            Node<TabItem>($"Round{curr - 1}").Focus();
+            MainTabControl.Items.Apply(ti => (ti as TabItem).Name == $"Round{curr - 1}", ti => (ti as TabItem).Focus());
+            //Node<TabItem>($"Round{curr - 1}").Focus();
         }
 
         private void ShowRankings(object sender, RoutedEventArgs e)
@@ -540,10 +530,10 @@ namespace TKD.App
         {
             WSSV?.Stop();
             //SetIp();
-            WSSV = new WebSocketServer($"ws://{Settings.IP}:8088");
+            //WSSV = new WebSocketServer($"ws://{Settings.IP}:8088");
 
-            foreach (var name in new List<string>() { "/TKD", "/HeadRef" })
-            WSSV.AddWebSocketService(name,
+            //foreach (var name in new List<string>() { "/TKD", "/HeadRef" })
+            /*WSSV.AddWebSocketService(name,
                 () => new TKDClient
                 {
                     BaseWindow = this,
@@ -554,8 +544,8 @@ namespace TKD.App
                     AppContext = Context,
                     ActiveContestantController = ActiveContestantController
                 }
-            );
-            WSSV.Start();
+            );*/
+            //WSSV.Start();
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 BorderThickness = new Thickness(0);

@@ -749,29 +749,6 @@
                                  Grid.Row="1"
                                  Text="{Binding Surname, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"
                                  VerticalAlignment="Center" />
-                        <Label Content="Category:"
-                               Grid.Column="2"
-                               HorizontalAlignment="Left"
-                               Margin="3,3,0,3"
-                               Grid.Row="2"
-                               VerticalAlignment="Center"
-                               Height="26"
-                               Width="61" />
-                        <ComboBox x:Name="CategoryComboBox"
-                                  Grid.Column="2"
-                                  Grid.ColumnSpan="2"
-                                  DisplayMemberPath="Name"
-                                  Height="22"
-                                  SelectedItem="{Binding Category}"
-                                  Margin="3,3,3,4"
-                                  Grid.Row="3"
-                                  VerticalAlignment="Center">
-                            <ComboBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <VirtualizingStackPanel />
-                                </ItemsPanelTemplate>
-                            </ComboBox.ItemsPanel>
-                        </ComboBox>
                         <Label Content="Team:"
                                Grid.Column="0"
                                HorizontalAlignment="Left"
@@ -789,6 +766,29 @@
                                   Grid.Row="3"
                                   VerticalAlignment="Center"
                                   Grid.ColumnSpan="2">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <Label Content="Category:"
+                               Grid.Column="2"
+                               HorizontalAlignment="Left"
+                               Margin="3,3,0,3"
+                               Grid.Row="2"
+                               VerticalAlignment="Center"
+                               Height="26"
+                               Width="61" />
+                        <ComboBox x:Name="CategoryComboBox"
+                                  Grid.Column="2"
+                                  Grid.ColumnSpan="2"
+                                  DisplayMemberPath="Name"
+                                  Height="22"
+                                  SelectedItem="{Binding Category}"
+                                  Margin="3,3,3,4"
+                                  Grid.Row="3"
+                                  VerticalAlignment="Center">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel />

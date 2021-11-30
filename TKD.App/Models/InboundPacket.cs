@@ -29,6 +29,11 @@ namespace TKD.App
             Accuracy = acc;
             Presentation = pres;
         }
+        public Scores(double acc, double pres)
+        {
+            Accuracy = Convert.ToInt32(acc);
+            Presentation = Convert.ToInt32(pres);
+        }
         public int Accuracy { get; set; }
         public int Presentation { get; set; }
     }

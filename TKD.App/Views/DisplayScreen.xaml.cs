@@ -19,10 +19,9 @@ namespace TKD.App.Views
             {
                 Left = Screen.AllScreens[1].Bounds.Left;
                 Top = Screen.AllScreens[1].Bounds.Top;
+                WindowStyle = WindowStyle.None;
+                WindowState = WindowState.Maximized;
             }
-
-            WindowStyle = WindowStyle.None;
-            WindowState = WindowState.Maximized;
         }
     }
 }

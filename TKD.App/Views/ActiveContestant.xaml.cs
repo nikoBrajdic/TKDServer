@@ -1,7 +1,6 @@
 ﻿#define MVVM
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -42,31 +41,22 @@ namespace TKD.App
         private ContestantPage ContestantPage { get => MainWindow.ContestantPage; }
         private ContestantPage MiniContestantPage { get => MainWindow.MiniContestantPage; }
 
+        DispatcherTimer timer;
+        bool started = false;
+
         public ActiveContestant()
         {
             InitializeComponent();
         }
 
-        DispatcherTimer timer;
-        bool started = false;
-
-
         private void ResetTextBoxBorders(UIElementCollection control)
         {
             foreach (var child in control)
+            foreach (var grandchild in (child as Grid).Children) if (grandchild is TextBox)
             {
-                if (child is Grid)
-                {
-                    foreach (var grandchild in (child as Grid).Children)
-                    {
-                        if (grandchild is TextBox)
-                        {
-                            (grandchild as TextBox).ClearValue(Border.BorderBrushProperty);
-                            (grandchild as TextBox).ClearValue(Border.BorderThicknessProperty);
-                            (grandchild as TextBox).ClearValue(ForegroundProperty);
-                        }
-                    }
-                }
+                (grandchild as TextBox).ClearValue(Border.BorderBrushProperty);
+                (grandchild as TextBox).ClearValue(Border.BorderThicknessProperty);
+                (grandchild as TextBox).ClearValue(ForegroundProperty);
             }
         }
 
@@ -81,27 +71,24 @@ namespace TKD.App
             foreach (var device in Devices.Where(d => d.Handle.Ping() && d.Enabled))
             {
                 var i = device.Id;
-                var lScore = 10 * Score.SoloScores?.FirstOrDefault(ss => 
-                    ss.Type == "Accuracy" && 
-                    ss.Index == i)?.Value ?? (Category.IsFreestyle ? 60 : 40);
-                var rScore = 10 * Score.SoloScores?.FirstOrDefault(ss => 
-                    ss.Type == "Presentation" && 
-                    ss.Index == i)?.Value ?? (Category.IsFreestyle ? 40 : 60);
-                var scores = new Scores(Convert.ToInt32(lScore), Convert.ToInt32(rScore));
-                var serialised = OutboundPacket.Instructions("init", setScores: scores);
-                device.Handle.SendAsync(serialised, null);
+                var soloScores = Score.SoloScores?.Where(ss => ss.Index == i);
+                var lScore = 10 * soloScores?.First(ss => ss.Type == "Accuracy")?.Value ?? (Category.IsFreestyle ? 60 : 40);
+                var rScore = 10 * soloScores?.First(ss => ss.Type == "Presentation")?.Value ?? (Category.IsFreestyle ? 40 : 60);
+                var scores = new Scores(lScore, rScore);
+                device.Handle.SendAsync(OutboundPacket.Instructions("init", setScores: scores), null);
             }
 #endregion
 #region refresh display screen
-            var currRound = Category.CurrentRound;
-            var index = Score.Index;
-            foreach (var page in new List<ContestantPage>() { ContestantPage, MiniContestantPage })
+            void RefreshDisplay(ContestantPage page)
             {
                 page.DisplayPoomsaeName.Content = Category.CategoryPoomsaes
-                        .FirstOrDefault(cp => cp.Round == Category.CurrentRound && cp.Index == index)?.Poomsae.Name;
+                        .FirstOrDefault(cp => cp.Round == Category.CurrentRound && cp.Index == Score.Index)?.Poomsae.Name;
                 page.DisplayTotal.Content = "";
                 page.DisplayTimer.Content = "1:30";
             }
+            RefreshDisplay(ContestantPage);
+            RefreshDisplay(MiniContestantPage);
+            RefreshDisplay(MirrorWindow.Visual as ContestantPage);
             DisplayScreen.DisplayScreenFrame.Content = ContestantPage;
             MirrorWindow.Visual = MiniContestantPage;
 #endregion
@@ -127,6 +114,7 @@ namespace TKD.App
                 {
                     ContestantPage.DisplayTimer.Content = timeSpan.ToString(@"mm\:ss");
                     MiniContestantPage.DisplayTimer.Content = timeSpan.ToString(@"mm\:ss");
+                    (MirrorWindow.Visual as ContestantPage).DisplayTimer.Content = timeSpan.ToString(@"mm\:ss");
                     if (timeSpan == TimeSpan.Zero) timer.Stop();
                     timeSpan += TimeSpan.FromSeconds(-1);
                 },
@@ -142,8 +130,8 @@ namespace TKD.App
         {
             ResetTextBoxBorders(children);
             var allTextBoxes = new List<TextBox>();
-            var allTextBoxesL = children.MapIf(c => c is Grid && c.Visibility == Visibility.Visible, c => (c as Grid).Children[1] as TextBox);
-            var allTextBoxesR = children.MapIf(c => c is Grid && c.Visibility == Visibility.Visible, c => (c as Grid).Children[2] as TextBox);
+            var allTextBoxesL = children.Map(c => c.Visibility == Visibility.Visible, c => (c as Grid).Children[1] as TextBox);
+            var allTextBoxesR = children.Map(c => c.Visibility == Visibility.Visible, c => (c as Grid).Children[2] as TextBox);
 
             allTextBoxes.AddRange(allTextBoxesL);
             allTextBoxes.AddRange(allTextBoxesR);
@@ -170,7 +158,7 @@ namespace TKD.App
                 Score.DisGrandTotal = Score.DisAccuracyGrandTotal + Score.DisPresentationGrandTotal;
                 Score.DisMinorTotal = Score.DisAccuracyMinorTotal + Score.DisPresentationMinorTotal;
                 Score.DisMinorMean = Score.DisMinorTotal / 2 / (RefNo - (redCells.All(it => it != null) ? redCells.Count / 2 : 0));
-                // has to be here because i haven't implemented OnPropertyChanged for it yet.
+                // has to be here because i haven't successfully implemented OnPropertyChanged for it yet.
                 ContestantPage.DisplayTotal.Content = ((double)Score.MinorMean).ToString("0.00");
                 MiniContestantPage.DisplayTotal.Content = ((double)Score.MinorMean).ToString("0.00");
                 // successfully
@@ -244,25 +232,24 @@ namespace TKD.App
         }
         private void Init(object sender, RoutedEventArgs e)
         {
-            var scores = Category.IsFreestyle ? new Scores(60, 40) : new Scores(40, 60);
+            var scores = Category.IsFreestyle ? new Scores(40, 60) : new Scores(60, 40);
             var ID = int.Parse((((sender as MenuItem).Parent as ContextMenu).PlacementTarget as Button).Tag.ToString());
             Devices.First(d => d.Id == ID).Handle.Send(OutboundPacket.Instructions("init", setScores: scores));
-            ((ScoresGrid.Children[ID + 2] as Grid).Children[1] as TextBox).Text = (scores.Accuracy / 10f).ToString("0.0");
-            ((ScoresGrid.Children[ID + 2] as Grid).Children[2] as TextBox).Text = (scores.Presentation / 10f).ToString("0.0");
+            ((ScoresGrid.Children[ID + 1] as Grid).Children[1] as TextBox).Text = (scores.Accuracy / 10f).ToString("0.0");
+            ((ScoresGrid.Children[ID + 1] as Grid).Children[2] as TextBox).Text = (scores.Presentation / 10f).ToString("0.0");
             MainWindow.LogWindow.Log($"Initialised #{ID}");
         }
         private void Release(object sender, RoutedEventArgs e)
         {
             var ID = int.Parse((((sender as MenuItem).Parent as ContextMenu).PlacementTarget as Button).Tag.ToString());
-            Devices.First(d => d.Id == ID).Handle.Send(OutboundPacket.Instructions("disconnect"));
-            MainWindow.LogWindow.Log("Released");
+            var device = Devices.First(d => d.Id == ID);
+            device.Handle.Send(OutboundPacket.Instructions("disconnect"));
         }
 
         private readonly Regex Regex = new Regex(@"(?:^\d|^\.\d|^\d\.\d?)$");
         private void TextBoxTextChanged(object sender, EventArgs e)
         {
-            var textBox = sender as TextBox;
-            textBox.Text = textBox.Text.Replace(",", ".");
+            var textBox = (sender as TextBox).Also(t => t.Text = t.Text.Replace(",", "."));
             var text = textBox.Text;
             if (text.Length > 0)
                 textBox.CaretIndex = text.Length;

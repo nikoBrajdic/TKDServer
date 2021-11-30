@@ -7,7 +7,7 @@ namespace TKD.App.Models
 
     public partial class TkdModel : DbContext
     {
-        public TkdModel() : base("name=TkdModel")
+        public TkdModel() : base("name=tkdModel")
         {
             Database.SetInitializer(new MigrateDatabaseToLatestVersion<TkdModel, Migrations.Configuration>());
         }
